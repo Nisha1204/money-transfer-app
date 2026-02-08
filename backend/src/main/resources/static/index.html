@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bank Backend Tester</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; }
+        section { border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; border-radius: 8px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    </style>
+</head>
+<body>
+<h1>Bank API Tester</h1>
+
+<section>
+    <h3>Execute Transfer</h3>
+    <input type="number" id="fromId" placeholder="From ID">
+    <input type="number" id="toId" placeholder="To ID">
+    <input type="number" id="amount" placeholder="Amount">
+    <button onclick="transfer()">Send Money</button>
+    <p id="transferRes"></p>
+</section>
+
+<section>
+    <h3>Account Details & History</h3>
+    <input type="number" id="accId" placeholder="Account ID">
+    <button onclick="getAccount()">Get Details</button>
+    <button onclick="getHistory()">Get Transactions</button>
+
+    <div id="accDetails" style="margin-top:10px; color: blue;"></div>
+
+    <table id="historyTable" style="display:none;">
+        <thead>
+        <tr>
+            <th>From</th><th>To</th><th>Amount</th><th>Status</th><th>Date</th>
+        </tr>
+        </thead>
+        <tbody id="historyBody"></tbody>
+    </table>
+</section>
+
+<script>
+
+    async function transfer() {
+        const fromEl = document.getElementById('fromId');
+        const toEl = document.getElementById('toId');
+        const amountEl = document.getElementById('amount');
+        const resMsg = document.getElementById('transferRes');
+        const accIdField = document.getElementById('accId');
+
+        // 1. Frontend validation
+        if (fromEl.value === toEl.value) {
+            resMsg.innerHTML = `<span style="color: orange;">Source and destination IDs must be different.</span>`;
+            return;
+        }
+
+        const data = {
+            fromAccountId: fromEl.value,
+            toAccountId: toEl.value,
+            amount: amountEl.value,
+            idempotencyKey: Math.floor(Math.random() * 1000000)
+        };
+
+        try {
+            const resp = await fetch('/api/v1/transfers', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+
+            const result = await resp.json().catch(() => ({ message: "Unexpected error" }));
+
+            if (resp.ok) {
+                resMsg.innerHTML = `<span style="color: green;">Transfer Successful!</span>`;
+
+                // --- AUTO-REFRESH OR CLEAR LOGIC ---
+                /*
+                if (accIdField.value === fromEl.value || accIdField.value === toEl.value) {
+                    // Refresh details and history if the current view is part of the transfer
+                    getAccount();
+                    //getHistory();
+                }
+                else {
+                    // Clear the account and transaction details if they belong to an unrelated ID
+                    document.getElementById('accDetails').innerHTML = '';
+                    document.getElementById('historyBody').innerHTML = '';
+                    document.getElementById('historyTable').style.display = 'none';
+                }
+                */
+
+                document.getElementById('accDetails').innerHTML = '';
+                document.getElementById('historyBody').innerHTML = '';
+                document.getElementById('historyTable').style.display = 'none';
+                accIdField.value = '';
+
+                // Clear the input fields
+                fromEl.value = '';
+                toEl.value = '';
+                amountEl.value = '';
+
+                // Optional: Clear success message after 5 seconds
+                setTimeout(() => { resMsg.innerText = ''; }, 5000);
+            } else {
+                resMsg.innerHTML = `<span style="color: red;">Error: ${result.message || 'Transfer failed'}</span>`;
+            }
+        } catch (err) {
+            resMsg.innerHTML = `<span style="color: red;">Network error: ${err.message}</span>`;
+        }
+    }
+
+        async function getAccount() {
+        const accDetails = document.getElementById('accDetails');
+        const id = document.getElementById('accId').value;
+
+        accDetails.style.display = 'block';
+        document.getElementById('historyTable').style.display = 'none';
+
+        if (!id) {
+            accDetails.innerHTML = `<span style="color: orange;">Please enter an Account ID.</span>`;
+            return;
+        }
+
+        accDetails.innerText = "Loading details...";
+
+        try {
+            const resp = await fetch(`/api/v1/accounts/${id}`);
+            const data = await resp.json();
+
+            if (!resp.ok) {
+                // Displays the "Access Denied" or "Not Found" message from your Java Backend
+                accDetails.innerHTML = `<span style="color: red;">${data.message}</span>`;
+                return;
+            }
+
+            accDetails.innerText = `Name: ${data.holderName} | Balance: $${data.balance} | Status: ${data.status}`;
+        } catch (err) {
+            accDetails.innerHTML = `<span style="color: red;">Network error. Is the server running?</span>`;
+        }
+    }
+
+    async function getHistory() {
+        const table = document.getElementById('historyTable');
+        const body = document.getElementById('historyBody');
+        const accDetails = document.getElementById('accDetails');
+        const id = document.getElementById('accId').value;
+
+        // Reset view
+        body.innerHTML = '';
+        accDetails.style.display = 'block';
+        table.style.display = 'none';
+
+        if (!id) {
+            accDetails.innerHTML = `<span style="color: orange;">Please enter an ID to view history.</span>`;
+            return;
+        }
+
+        accDetails.innerText = "Fetching transactions...";
+
+        try {
+            const resp = await fetch(`/api/v1/accounts/${id}/transactions`);
+            const data = await resp.json();
+
+            if (!resp.ok) {
+                accDetails.innerHTML = `<span style="color: red;">${data.message}</span>`;
+                return;
+            }
+
+            if (data.length === 0) {
+                accDetails.innerHTML = `<span style="color: blue;">No transaction history found for this account.</span>`;
+                return;
+            }
+
+            // Hide the "Fetching..." message and show the table
+            accDetails.style.display = 'none';
+            table.style.display = 'table';
+
+            const rows = data.map(log => {
+                const date = new Date(log.createdOn);
+                const formattedDate = date.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+
+                return `<tr>
+                    <td>${log.fromAccountId}</td>
+                    <td>${log.toAccountId}</td>
+                    <td>$${log.amount.toFixed(2)}</td>
+                    <td><strong style="color: ${log.status === 'SUCCESS' ? 'green' : 'red'}">${log.status}</strong></td>
+                    <td>${formattedDate}</td>
+                </tr>`;
+            });
+
+            body.innerHTML = rows.join('');
+        } catch (err) {
+            accDetails.innerHTML = `<span style="color: red;">Connection lost.</span>`;
+        }
+    }
+</script>
+</body>
+</html>

@@ -65,40 +65,6 @@ public class AccountServiceImpl implements AccountService {
         return accountRepository.findById(id).orElseThrow(()-> new RuntimeException("Account not found"));
     }
 
-    /*
-    @Override
-    @Transactional
-    public void transfer(int fromId, int toId, float amount) {
-        // MOVE LOG INITIALIZATION TO THE TOP
-        TransactionLog log = new TransactionLog();
-        log.setFromAccountId(fromId);
-        log.setToAccountId(toId);
-        log.setAmount(amount);
-
-        try {
-            Account fromAcc = accountRepository.findById(fromId)
-                    .orElseThrow(() -> new RuntimeException("Sender account not found"));
-            Account toAcc = accountRepository.findById(toId)
-                    .orElseThrow(() -> new RuntimeException("Receiver account not found"));
-
-            if (fromAcc.debit(amount)) {
-                toAcc.credit(amount);
-                accountRepository.save(fromAcc);
-                accountRepository.save(toAcc);
-                log.setStatus(TransactionLog.TransactionStatus.SUCCESS);
-            } else {
-                throw new RuntimeException("Insufficient balance");
-            }
-        } catch (Exception e) {
-            log.setStatus(TransactionLog.TransactionStatus.FAILED);
-            log.setFailureReason(e.getMessage());
-            throw e;
-        } finally {
-            // Now 'fromAccountId' is guaranteed to be set before saving
-            transactionRepo.save(log);
-        }
-    }*/
-
     @Override
     @Transactional
     public void transfer(int fromId, int toId, float amount) {

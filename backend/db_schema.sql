@@ -21,7 +21,7 @@ CREATE TABLE accounts (
     id INT AUTO_INCREMENT PRIMARY KEY,
     holder_name VARCHAR(255) DEFAULT NULL,
     balance FLOAT NOT NULL DEFAULT 0.0,
-    status VARCHAR(50) DEFAULT 'ACTIVE',
+    status ENUM('ACTIVE','LOCKED','CLOSED') NOT NULL,
     version INT DEFAULT 1,
     last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     user_id INT, 
@@ -43,3 +43,16 @@ INSERT INTO accounts (holder_name, balance, status, version, last_updated, user_
 ('Bob',   2700.00, 'ACTIVE', 1, NOW(), 2), 
 ('Charlie', 450.00, 'ACTIVE', 1, NOW(), 3), 
 ('David',    3200.00, 'ACTIVE', 1, NOW(), 3)
+
+CREATE TABLE transaction_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    fromAccountId INT NOT NULL,
+    toAccountId INT NOT NULL,
+    amount FLOAT NOT NULL,
+    status ENUM('SUCCESS', 'FAILED') NOT NULL,
+    failureReason VARCHAR(255) NULL,
+    idempotencyKey INT NULL DEFAULT 0,
+    createdOn TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY fromAccountId REFERENCES accounts(id),
+    FOREIGN KEY toAccountId REFERENCES accounts(id),
+);

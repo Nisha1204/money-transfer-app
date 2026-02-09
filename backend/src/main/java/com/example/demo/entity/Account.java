@@ -27,6 +27,7 @@ public class Account {
     private String holderName;
     @Column(name="balance")
     private float balance;
+    @Getter
     @Column(name = "status")
     private String status;
 
@@ -87,5 +88,7 @@ public class Account {
         return "ACTIVE".equalsIgnoreCase(status);
     }
 
-
+    public void setStatus(String status) {
+        this.status = status;
+    }
 }

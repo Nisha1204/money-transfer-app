@@ -1,5 +1,6 @@
 package com.example.demo.entity;
 
+import com.example.demo.enums.TransactionStatus;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -19,7 +20,7 @@ public class TransactionLog {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private String id;
 
     @Column(name = "fromAccountId", nullable = false)
     private int fromAccountId;
@@ -27,6 +28,7 @@ public class TransactionLog {
     @Column(name = "toAccountId", nullable = false)
     private int toAccountId;
 
+    @Column(nullable = false)
     private float amount;
 
     @Enumerated(EnumType.STRING)
@@ -41,39 +43,9 @@ public class TransactionLog {
     @Column(name = "createdOn", nullable = false)
     private LocalDateTime createdOn;
 
-    public enum TransactionStatus {
-        SUCCESS, FAILED
-    }
-
     @PrePersist
     protected void onCreate() {
         this.createdOn = LocalDateTime.now();
     }
 
-    /*
-    // Getters and Setters
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
-    public int getFromAccountId() { return fromAccountId; }
-    public void setFromAccountId(int fromAccountId) { this.fromAccountId = fromAccountId; }
-    public int getToAccountId() { return toAccountId; }
-    public void setToAccountId(int toAccountId) { this.toAccountId = toAccountId; }
-    public float getAmount() { return amount; }
-    public void setAmount(float amount) { this.amount = amount; }
-    public TransactionStatus getStatus() { return status; }
-    public void setStatus(TransactionStatus status) { this.status = status; }
-    public String getFailureReason() { return failureReason; }
-    public void setFailureReason(String failureReason) { this.failureReason = failureReason; }
-    public int getIdempotencyKey() { return idempotencyKey; }
-    public void setIdempotencyKey(int idempotencyKey) { this.idempotencyKey = idempotencyKey; }
-
-    public LocalDateTime getCreatedOn() {
-        return createdOn;
-    }
-
-    public void setCreatedOn(LocalDateTime createdOn) {
-        this.createdOn = createdOn;
-    }
-
-     */
 }

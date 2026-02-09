@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import com.example.demo.dto.AccountResponse;
 import com.example.demo.entity.Account;
 import com.example.demo.entity.TransactionLog;
 
@@ -12,7 +13,7 @@ public interface AccountService {
 
     void updateAccount(int id, float balance);
 
-    Account getAccount(int id);
+    AccountResponse getAccount(int id);
 
     void transfer(int fromId, int toId, float amount);
 

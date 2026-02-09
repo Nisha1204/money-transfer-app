@@ -1,6 +1,7 @@
 package com.example.demo.service;
 
 
+import com.example.demo.dto.AccountResponse;
 import com.example.demo.entity.Account;
 import com.example.demo.entity.TransactionLog;
 import com.example.demo.exception.AccountNotFoundException;
@@ -48,21 +49,25 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public void updateAccount(int id, float balance ) {
+    public void updateAccount(int id, float balance) {
         logger.info("Updating Account with ID: {} to balance: {} ", id, balance);
-        Account acc = accountRepository.findById(id).orElseThrow(()-> new RuntimeException("Account not found"));
-        if (acc != null) {
-            acc.setBalance(balance);
-            accountRepository.save(acc);
-        }
+        // Changed to use your custom Exception for consistency
+        Account acc = accountRepository.findById(id)
+                .orElseThrow(() -> new AccountNotFoundException(id));
+
+        acc.setBalance(balance);
+        accountRepository.save(acc);
     }
 
     @Override
-    public Account getAccount (int id) {
-        validateOwnership(id); // If this fails, the code stops here
+    public AccountResponse getAccount(int id) {
+        validateOwnership(id);
 
         logger.info("Getting Account with ID: {}", id);
-        return accountRepository.findById(id).orElseThrow(()-> new RuntimeException("Account not found"));
+        Account account = accountRepository.findById(id)
+                .orElseThrow(() -> new AccountNotFoundException(id));
+
+        return mapToResponse(account);
     }
 
     /*
@@ -98,6 +103,17 @@ public class AccountServiceImpl implements AccountService {
             transactionRepo.save(log);
         }
     }*/
+
+    private AccountResponse mapToResponse(Account account) {
+        AccountResponse response = new AccountResponse();
+        response.setId(account.getId());
+        response.setHolderName(account.getHolderName());
+        response.setBalance(account.getBalance());
+        response.setStatus(account.getStatus()); // Assumes Account entity has status
+        response.setUpdatedAt(account.getUpdatedAt()); // Assumes Account entity has updatedAt
+        response.setOwner(account.getOwner());
+        return response;
+    }
 
     @Override
     @Transactional
@@ -145,6 +161,7 @@ public class AccountServiceImpl implements AccountService {
     // In AccountServiceImpl.java
 
     public float getBalance(int id) {
+        // We can call getAccount(id) which now returns a DTO
         return getAccount(id).getBalance();
     }
 

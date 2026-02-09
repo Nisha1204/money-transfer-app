@@ -2,11 +2,11 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/money_db
-    username: <YOUR_USERNAME>
-    password: <YOUR_PASSWORD>
+    username: root
+    password: Root123$
   security:
-    username: <USERNAME>
-    password: <PASSWORD>
+    username: Admin
+    password: password
 
   jpa:
     show-sql: true

@@ -1,7 +1,9 @@
 package com.example.demo.entity;
 
-import java.util.Objects;
-
+import java.util.*;
+import com.example.demo.enums.AccountStatus;
+import com.example.demo.exception.AccountNotActiveException;
+import com.example.demo.exception.InsufficientBalanceException;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -28,7 +30,7 @@ public class Account {
     @Column(name="balance")
     private float balance;
     @Column(name = "status")
-    private String status;
+    private AccountStatus status;
 
     @Column(name="version")
     private int version;
@@ -66,12 +68,14 @@ public class Account {
         if (amount <= 0) {
             throw new IllegalArgumentException("Amount must be positive.");
         }
-        if (balance >= amount) {
-            balance -= amount;
-            return true;
-        } else {
-            return false; // Insufficient funds
+        if (!isActive()){
+            throw new AccountNotActiveException(id);
         }
+        if (balance <= amount) {
+            throw new InsufficientBalanceException();
+        }
+        balance -= amount;
+        return true;
     }
 
     // Credit method: adds amount to balance
@@ -79,12 +83,16 @@ public class Account {
         if (amount <= 0) {
             throw new IllegalArgumentException("Amount must be positive.");
         }
+        if(!isActive()){
+            throw new AccountNotActiveException(id);
+        }
         balance += amount;
     }
 
     // Is account active? Assuming "ACTIVE" status means the account is active
     public boolean isActive() {
-        return "ACTIVE".equalsIgnoreCase(status);
+        return this.status.equals(AccountStatus.ACTIVE);
+
     }
 
 

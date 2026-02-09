@@ -10,6 +10,4 @@ public class TransferRequest {
     private int toAccountId;
     private float amount;
     private int idempotencyKey;
-
-
 }

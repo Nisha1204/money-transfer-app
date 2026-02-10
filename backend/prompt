@@ -1,0 +1,27 @@
+Here is a concise, high-context prompt you can paste into a new chat. It summarizes the architectural hurdles and the specific technical "gotchas" we just resolved.
+
+---
+
+### Context Transfer Prompt
+
+**Subject: Spring Boot Transactional Audit Logging System**
+
+"I am working on a Spring Boot application with a specialized `AuditService` designed to log transaction attempts (successes and failures) using `Propagation.REQUIRES_NEW`. We recently resolved several critical issues regarding the `TransactionLog` entity and its persistence. Please keep this context in mind for our future troubleshooting:
+
+* **Primary Issue:** We were facing `IdentifierGenerationException` and `UnexpectedRollbackException` because the entity was using `@GeneratedValue(strategy = GenerationType.IDENTITY)` while I was manually providing a `String` UUID as the ID.
+* **The Fix:** We removed the generated value strategy and implemented `Persistable<String>` to manually manage the entity state.
+* **isNew() Logic:** To avoid unnecessary `SELECT` queries before `INSERT`, we overridden `isNew()` to return `true` only when the `createdOn` timestamp is null.
+* **Transaction Handling:** We are using `saveAndFlush()` within a `try-catch` block in the `AuditService` to ensure that even if the audit log fails (e.g., due to a DB constraint), it doesn't silently break the parent transaction or fail to log the error.
+* **Current Stack:** Spring Data JPA, Hibernate, Lombok, and PostgreSQL/MySQL.
+
+**The current goal is:** [Insert your next objective here, e.g., 'implementing the TransferService logic' or 'adding idempotency checks']."
+
+---
+
+### Why this prompt works:
+
+* **The "Why":** It explains the specific exception names, which helps the AI understand the history of the "Identity" vs. "Assigned" ID conflict.
+* **The "How":** It details the `Persistable` interface implementation, which is a non-standard but necessary fix for manual IDs in JPA.
+* **The "State":** It defines the exact state of the `isNew()` logic, preventing the new chat from suggesting you go back to standard `@Id` configurations.
+
+**Would you like me to also generate the corresponding `TransferService` code that utilizes this `AuditService` before you switch chats?**

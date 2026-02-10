@@ -3,6 +3,7 @@ package com.example.demo.service;
 import com.example.demo.dto.TransferRequest;
 import com.example.demo.dto.TransferResponse;
 import com.example.demo.entity.Account;
+import com.example.demo.entity.TransactionLog;
 import com.example.demo.enums.TransactionStatus;
 import com.example.demo.exception.*;
 import com.example.demo.repository.AccountRepo;
@@ -14,98 +15,133 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
 
 @Service
 @RequiredArgsConstructor
 public class TransferServiceImpl implements TransferService {
-    private static final Logger log = org.slf4j.LoggerFactory.getLogger("transfer-service");
+
+    private static final Logger logger = org.slf4j.LoggerFactory.getLogger("transfer-service");
+
     private final AccountRepo accountRepo;
     private final TransactionLogRepo transactionRepo;
-    private final AuditService auditService;
 
     @Override
-    @Transactional(
-            // These exceptions will NOT automatically mark the transaction as "rollback-only"
-            noRollbackFor = {
-                    InsufficientBalanceException.class,
-                    AccountNotActiveException.class,
-                    AccountNotFoundException.class,
-                    DuplicateTransferException.class,
-                    IllegalArgumentException.class,  // Important: for validateRequest
-                    AccessDeniedException.class      // Important: for security check
-            }
-    )
+    @Transactional(noRollbackFor = {InsufficientBalanceException.class, AccountNotFoundException.class})
     public TransferResponse transfer(TransferRequest request) {
-        String transactionId = "TRX-" + java.util.UUID.randomUUID();
+        String transactionId = "TRX-" + UUID.randomUUID();
 
         try {
-            validateRequest(request);
-            return executeSecureTransfer(transactionId, request);
+            validateTransfer(request);
+
+            checkIdempotency(request.getIdempotencyKey());
+
+            return executeTransfer(request, transactionId);
 
         } catch (Exception ex) {
-            log.error("Transfer {} failed: {}", transactionId, ex.getMessage());
+            try {
+                TransactionLog log = new TransactionLog();
+                log.setId(transactionId);
+                log.setFromAccountId(request.getFromAccountId());
+                log.setToAccountId(request.getToAccountId());
+                log.setAmount(request.getAmount());
+                log.setStatus(TransactionStatus.FAILED);
+                log.setFailureReason(ex.getMessage());
+                log.setIdempotencyKey(request.getIdempotencyKey());
 
-            // Because of noRollbackFor, this call can now succeed
-            // without the "silent rollback" error.
-            auditService.logTransaction(transactionId, request, TransactionStatus.FAILED, ex.getMessage());
+                transactionRepo.save(log);
 
-            // We still throw the exception so the Controller knows to return an error
-            // and any partial DB changes in THIS method are rolled back.
+                logger.info("Failed transaction logged: {}", transactionId);
+            } catch (Exception new_ex) {
+                logger.error("Failed to log transaction failure", new_ex);
+            }
             throw ex;
         }
     }
 
-    private void validateRequest(TransferRequest request) {
+    private void validateTransfer(TransferRequest request) {
+        logger.debug("Validating transfer request");
+
         if (request.getFromAccountId().equals(request.getToAccountId())) {
-            throw new IllegalArgumentException("Source and destination accounts cannot be the same.");
+            throw new IllegalArgumentException(
+                    "Source and destination accounts must be different"
+            );
         }
-        // Corrected BigDecimal comparison
+
         if (request.getAmount().signum() <= 0) {
             throw new IllegalArgumentException("Transfer amount must be positive");
         }
-        if (transactionRepo.existsByIdempotencyKey(request.getIdempotencyKey())) {
-            throw new DuplicateTransferException(request.getIdempotencyKey());
-        }
-    }
 
-    private TransferResponse executeSecureTransfer(String transactionId, TransferRequest request) {
-        Long firstId = Math.min(request.getFromAccountId(), request.getToAccountId());
-        Long secondId = Math.max(request.getFromAccountId(), request.getToAccountId());
+        Account from = accountRepo.findById(request.getFromAccountId())
+                .orElseThrow(() -> new AccountNotFoundException(request.getFromAccountId()));
 
-        Account firstAccount = accountRepo.findByIdWithLock(firstId)
-                .orElseThrow(() -> new AccountNotFoundException(firstId));
-        Account secondAccount = accountRepo.findByIdWithLock(secondId)
-                .orElseThrow(() -> new AccountNotFoundException(secondId));
-
-        Account from = firstId.equals(request.getFromAccountId()) ? firstAccount : secondAccount;
-        Account to = firstId.equals(request.getToAccountId()) ? firstAccount : secondAccount;
-
-        // Security Check
         String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
         if (!from.getOwner().getUsername().equals(currentUsername)) {
-            throw new AccessDeniedException("Unauthorized to transfer from this account.");
+            throw new AccessDeniedException("You are not authorized to transfer from this account.");
         }
 
-        if (!from.isActive()) throw new AccountNotActiveException(from.getId());
-        if (!to.isActive()) throw new AccountNotActiveException(to.getId());
+        logger.debug("Validation passed");
+    }
 
-        from.debit(request.getAmount());
-        to.credit(request.getAmount());
-        accountRepo.save(from);
-        accountRepo.save(to);
+    private void checkIdempotency(String idempotencyKey) {
+        logger.debug("Checking idempotency for key: {}", idempotencyKey);
 
-        // Updated call: Passing the transactionId
-        auditService.logTransaction(transactionId, request, TransactionStatus.SUCCESS, null);
+        transactionRepo.findByIdempotencyKey(idempotencyKey)
+                .ifPresent(existingTx -> {
+                    logger.warn("Duplicate transfer detected with key: {}", idempotencyKey);
+                    throw new DuplicateTransferException(idempotencyKey);
+                });
 
-        // Build Response
-        TransferResponse response = new TransferResponse();
-        response.setId(transactionId);
-        response.setFromAccountId(request.getFromAccountId());
-        response.setToAccountId(request.getToAccountId());
-        response.setAmount(request.getAmount());
-        response.setStatus(TransactionStatus.SUCCESS);
-        response.setMessage("Transfer completed successfully");
+        logger.debug("Idempotency check passed");
+    }
 
-        return response;
+    private TransferResponse executeTransfer(TransferRequest request, String transactionId) {
+        logger.debug("Executing transfer with locks");
+
+        Long firstLockId = Math.min(request.getFromAccountId(), request.getToAccountId());
+        Long secondLockId = Math.max(request.getFromAccountId(), request.getToAccountId());
+
+        Account firstAccount = accountRepo.findByIdWithLock(firstLockId)
+                .orElseThrow(() -> new AccountNotFoundException(firstLockId));
+
+        Account secondAccount = accountRepo.findByIdWithLock(secondLockId)
+                .orElseThrow(() -> new AccountNotFoundException(secondLockId));
+
+        Account fromAccount = firstLockId.equals(request.getFromAccountId())
+                ? firstAccount : secondAccount;
+        Account toAccount = firstLockId.equals(request.getToAccountId())
+                ? firstAccount : secondAccount;
+
+        logger.info("Locks acquired for accounts {} and {}",
+                fromAccount.getId(), toAccount.getId());
+
+        fromAccount.debit(request.getAmount());
+        logger.debug("Debited {} from account {}", request.getAmount(), fromAccount.getId());
+
+        toAccount.credit(request.getAmount());
+        logger.debug("Credited {} to account {}", request.getAmount(), toAccount.getId());
+
+        accountRepo.save(fromAccount);
+        accountRepo.save(toAccount);
+
+        TransactionLog transactionLog = new TransactionLog();
+        transactionLog.setId(transactionId);
+        transactionLog.setFromAccountId(request.getFromAccountId());
+        transactionLog.setToAccountId(request.getToAccountId());
+        transactionLog.setAmount(request.getAmount());
+        transactionLog.setStatus(TransactionStatus.SUCCESS);
+        transactionLog.setIdempotencyKey(request.getIdempotencyKey());
+        transactionRepo.save(transactionLog);
+
+        logger.info("Transfer completed successfully: {}", transactionLog.getId());
+        TransferResponse transferResponse = new TransferResponse();
+        transferResponse.setId(transactionLog.getId());
+        transferResponse.setStatus(TransactionStatus.SUCCESS);
+        transferResponse.setMessage("Transfer completed successfully");
+        transferResponse.setFromAccountId(request.getFromAccountId());
+        transferResponse.setToAccountId(request.getToAccountId());
+        transferResponse.setAmount(request.getAmount());
+        return transferResponse;
     }
 }

@@ -39,7 +39,7 @@ CREATE TABLE accounts (
 -- Transaction Logs Table (Depends on accounts)
 CREATE TABLE transaction_logs (
     -- Change to VARCHAR if you want to use UUIDs, or stay BIGINT for auto-increment
-    id VARCHAR(36) PRIMARY KEY,
+    id VARCHAR(64) PRIMARY KEY,
     fromAccountId BIGINT NOT NULL,
     toAccountId BIGINT NOT NULL,
     amount DECIMAL(19, 2) NOT NULL,

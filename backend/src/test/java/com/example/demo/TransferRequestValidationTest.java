@@ -32,8 +32,8 @@ class TransferRequestValidationTest {
     @Test
     void testNullFields() {
         TransferRequest request = new TransferRequest();
-        // In Java, primitive ints default to 0, not null.
-        assertEquals(0, request.getFromAccountId());
-        assertEquals(0, request.getToAccountId());
+        // Since these are likely Long objects (not primitives), they default to null
+        assertNull(request.getFromAccountId());
+        assertNull(request.getToAccountId());
     }
 }

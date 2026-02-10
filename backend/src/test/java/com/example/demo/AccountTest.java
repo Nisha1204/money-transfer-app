@@ -2,6 +2,7 @@ package com.example.demo;
 
 import com.example.demo.entity.Account;
 import com.example.demo.enums.AccountStatus;
+import com.example.demo.exception.InsufficientBalanceException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,9 +28,14 @@ class AccountTest {
     }
 
     @Test
-    @DisplayName("Should return false when funds are insufficient")
+    @DisplayName("Should throw exception when funds are insufficient")
     void testDebit_InsufficientBalance() {
-        account.debit(new java.math.BigDecimal("150.00"));
+        // Wrap the call in assertThrows because your Account.java throws an exception
+        assertThrows(InsufficientBalanceException.class, () -> {
+            account.debit(new java.math.BigDecimal("150.00"));
+        });
+
+        // Verify balance remained 100.00
         assertEquals(new java.math.BigDecimal("100.00"), account.getBalance(), "Balance should remain unchanged");
     }
 

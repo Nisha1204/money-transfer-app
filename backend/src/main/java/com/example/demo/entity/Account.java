@@ -90,10 +90,8 @@ public class Account {
         this.balance=this.balance.add(amount);
     }
 
-    // Is account active? Assuming "ACTIVE" status means the account is active
     public boolean isActive() {
-        return this.status.equals(AccountStatus.ACTIVE);
-
+        return AccountStatus.ACTIVE.equals(this.status);
     }
 
 

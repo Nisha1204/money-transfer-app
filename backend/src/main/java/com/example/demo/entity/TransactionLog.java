@@ -36,7 +36,7 @@ public class TransactionLog implements Persistable<String> {
     @Enumerated(EnumType.STRING)
     private TransactionStatus status;
 
-    @Column(name = "failureReason")
+    @Column(name = "failureReason", length = 1000) // Increase from default 255
     private String failureReason;
 
     private String idempotencyKey;

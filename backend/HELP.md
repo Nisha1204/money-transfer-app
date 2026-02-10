@@ -1,16 +1,117 @@
-# Getting Started
+# Money Transfer System
 
-### Reference Documentation
-For further reference, please consider the following sections:
+A **digital money transfer application** built progressively as a full-stack project.  
+The system demonstrates **enterprise backend design**, **secure REST APIs**, **modern frontend development**, and **analytics using Snowflake**.
 
-* [Official Apache Maven documentation](https://maven.apache.org/guides/index.html)
-* [Spring Boot Maven Plugin Reference Guide](https://docs.spring.io/spring-boot/4.0.2/maven-plugin)
-* [Create an OCI image](https://docs.spring.io/spring-boot/4.0.2/maven-plugin/build-image.html)
+---
 
-### Maven Parent overrides
+## Project Overview
 
-Due to Maven's design, elements are inherited from the parent POM to the project POM.
-While most of the inheritance is fine, it also inherits unwanted elements like `<license>` and `<developers>` from the parent.
-To prevent this, the project POM contains empty overrides for these elements.
-If you manually switch to a different parent and actually want the inheritance, you need to remove those overrides.
+Modern banking systems require secure, reliable, and auditable fund transfer mechanisms.  
+This project implements a **microservice-based money transfer system** with:
 
+- Secure account-to-account transfers
+- Complete transaction audit trail
+- RESTful backend services
+- Angular-based frontend UI
+- Analytical reporting using Snowflake
+
+The project is designed to be built **module-by-module**, aligning with structured training phases.
+
+---
+
+## Objectives
+
+- Build a **real-world banking microservice**
+- Apply concepts from:
+    - Git & branching strategies
+    - Advanced Java (Java 17)
+    - Spring Boot & Spring Security
+    - Angular (SPA)
+    - Snowflake analytics
+- Emphasize **clean architecture**, **scalability**, and **best practices**
+
+---
+
+## Technology Stack
+
+### Backend
+- Java 17
+- Spring Boot 3.x
+- Spring Data JPA
+- Spring Security
+- Spring AOP
+- MySQL 8.x
+- Maven
+
+### Frontend
+- Angular 15+
+- TypeScript
+- Angular Material
+- RxJS
+
+### Analytics
+- Snowflake Cloud
+- SQL
+- ETL using `COPY INTO`
+
+### Tooling
+- Git & GitHub
+- JUnit 5
+- Lombok
+- Postman
+
+---
+
+## 📂 Project Directory Structure
+
+```text
+money-transfer-system/
+│
+├── backend/                      # Spring Boot backend
+│   ├── src/
+│   │   ├── main/
+│   │   │   ├── java/
+│   │   │   │   └── com/example/moneytransfer/
+│   │   │   │       ├── controller/        # REST controllers
+│   │   │   │       ├── service/           # Business logic
+│   │   │   │       ├── repository/        # JPA repositories
+│   │   │   │       ├── entity/            # Entities
+│   │   │   │       ├── enum/              # Enums
+│   │   │   │       ├── dto/               # Request/response DTOs
+│   │   │   │       ├── exception/         # Custom exceptions
+│   │   │   │       ├── config/            # Security & app config
+│   │   │   │       └── aspect/            # AOP logging
+│   │   │   └── resources/
+│   │   │       ├── application.yml
+│   │   │       └── data.sql
+│   │   └── test/                          # Unit & integration tests
+│   └── pom.xml
+│
+├── frontend/                     # Angular frontend
+│   ├── src/
+│   │   ├── app/
+│   │   │   ├── components/
+│   │   │   │   ├── login/
+│   │   │   │   ├── dashboard/
+│   │   │   │   ├── transfer/
+│   │   │   │   └── history/
+│   │   │   ├── services/
+│   │   │   ├── guards/
+│   │   │   └── interceptors/
+│   │   └── environments/
+│   └── angular.json
+│
+├── database/                     # OLTP database scripts
+│   ├── schema.sql
+│   └── seed-data.sql
+│
+├── snowflake/                    # Data warehouse & analytics
+│   ├── ddl/
+│   ├── etl/
+│   └── analytics-queries.sql
+│
+├── docs/                         # Architecture & design docs
+│
+├── .gitignore
+└── README.md

@@ -1,0 +1,198 @@
+.balance-container {
+  padding: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.header-actions {
+  margin-bottom: 24px;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 20px;
+}
+
+.error-card {
+  max-width: 600px;
+  margin: 40px auto;
+  text-align: center;
+}
+
+.error-card mat-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 16px;
+}
+
+.balance-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Main Balance Card */
+.balance-main-card {
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  color: white;
+  padding: 40px 20px;
+}
+
+.balance-display {
+  text-align: center;
+}
+
+.balance-icon {
+  font-size: 80px;
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 20px;
+  display: block;
+}
+
+.balance-title {
+  font-size: 24px;
+  margin: 0 0 20px 0;
+  font-weight: 400;
+  opacity: 0.95;
+}
+
+.balance-amount {
+  font-size: 72px;
+  font-weight: bold;
+  margin: 20px 0;
+  letter-spacing: -2px;
+}
+
+.balance-subtitle {
+  font-size: 16px;
+  margin: 20px 0 0 0;
+  opacity: 0.9;
+}
+
+/* Summary Card */
+.summary-card {
+  margin-top: 16px;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 24px;
+  margin-top: 16px;
+}
+
+.summary-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.summary-item mat-icon {
+  color: #667eea;
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+}
+
+.summary-item div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.summary-item label {
+  font-size: 12px;
+  color: #666;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.summary-item span {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+}
+
+.status-active {
+  color: #11998e !important;
+}
+
+.status-locked {
+  color: #f5576c !important;
+}
+
+.status-closed {
+  color: #666 !important;
+}
+
+/* Quick Actions */
+.quick-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin: 24px 0;
+  flex-wrap: wrap;
+}
+
+.quick-actions button {
+  min-width: 180px;
+}
+
+/* Info Card */
+.info-card {
+  background-color: #e3f2fd;
+  border-left: 4px solid #2196f3;
+}
+
+.info-content {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.info-content mat-icon {
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+}
+
+.info-content h3 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  color: #1976d2;
+}
+
+.info-content p {
+  margin: 0;
+  color: #555;
+  line-height: 1.5;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .balance-container {
+    padding: 16px;
+  }
+
+  .balance-amount {
+    font-size: 48px;
+  }
+
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-actions {
+    flex-direction: column;
+  }
+
+  .quick-actions button {
+    width: 100%;
+  }
+}

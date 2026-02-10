@@ -1,0 +1,116 @@
+<div class="balance-container">
+  <div class="header-actions">
+    <button mat-raised-button (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon>
+      Back to Dashboard
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-container" *ngIf="loading">
+    <mat-spinner></mat-spinner>
+    <p>Loading balance...</p>
+  </div>
+
+  <!-- Error -->
+  <mat-card class="error-card" *ngIf="error && !loading">
+    <mat-card-content>
+      <mat-icon color="warn">error</mat-icon>
+      <p>{{ error }}</p>
+      <button mat-raised-button color="primary" (click)="loadBalance()">
+        Retry
+      </button>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Balance Display -->
+  <div class="balance-content" *ngIf="!loading && !error">
+    <!-- Main Balance Card -->
+    <mat-card class="balance-main-card">
+      <mat-card-content>
+        <div class="balance-display">
+          <mat-icon class="balance-icon">account_balance_wallet</mat-icon>
+          <h1 class="balance-title">Current Balance</h1>
+          <div class="balance-amount">
+            ₹{{ balance | number:'1.2-2' }}
+          </div>
+          <p class="balance-subtitle" *ngIf="accountData">
+            Account #{{ accountId }} - {{ accountData.holderName }}
+          </p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Account Summary Card -->
+    <mat-card class="summary-card" *ngIf="accountData">
+      <mat-card-header>
+        <mat-card-title>Account Summary</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="summary-grid">
+          <div class="summary-item">
+            <mat-icon>account_circle</mat-icon>
+            <div>
+              <label>Account Holder</label>
+              <span>{{ accountData.holderName }}</span>
+            </div>
+          </div>
+          <div class="summary-item">
+            <mat-icon>credit_card</mat-icon>
+            <div>
+              <label>Account Number</label>
+              <span>{{ accountData.id }}</span>
+            </div>
+          </div>
+          <div class="summary-item">
+            <mat-icon>verified</mat-icon>
+            <div>
+              <label>Status</label>
+              <span [class.status-active]="accountData.status === 'ACTIVE'"
+                    [class.status-locked]="accountData.status === 'LOCKED'"
+                    [class.status-closed]="accountData.status === 'CLOSED'">
+                {{ accountData.status }}
+              </span>
+            </div>
+          </div>
+          <div class="summary-item">
+            <mat-icon>update</mat-icon>
+            <div>
+              <label>Last Updated</label>
+              <span>{{ accountData.updatedAt | date:'medium' }}</span>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+      <button mat-raised-button color="primary" (click)="loadBalance()">
+        <mat-icon>refresh</mat-icon>
+        Refresh Balance
+      </button>
+      <button mat-raised-button color="accent" (click)="viewFullDetails()">
+        <mat-icon>info</mat-icon>
+        View Full Details
+      </button>
+      <button mat-stroked-button (click)="goBack()">
+        <mat-icon>home</mat-icon>
+        Back to Dashboard
+      </button>
+    </div>
+
+    <!-- Balance Info Card -->
+    <mat-card class="info-card">
+      <mat-card-content>
+        <div class="info-content">
+          <mat-icon color="primary">info</mat-icon>
+          <div>
+            <h3>Balance Inquiry</h3>
+            <p>This is your current available balance. The balance is updated in real-time whenever you perform transactions.</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

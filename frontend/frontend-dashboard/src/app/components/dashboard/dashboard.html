@@ -1,0 +1,125 @@
+<mat-toolbar color="primary">
+  <span class="toolbar-title">
+    <mat-icon>account_balance</mat-icon>
+    Money Transfer Dashboard
+  </span>
+  <span class="spacer"></span>
+  <button mat-button (click)="refreshData()">
+    <mat-icon>refresh</mat-icon>
+    Refresh
+  </button>
+  <button mat-button (click)="logout()">
+    <mat-icon>logout</mat-icon>
+    Logout
+  </button>
+</mat-toolbar>
+
+<div class="dashboard-container">
+  <!-- Loading Spinner -->
+  <div class="loading-container" *ngIf="loading">
+    <mat-spinner></mat-spinner>
+    <p>Loading account data...</p>
+  </div>
+
+  <!-- Error Message -->
+  <mat-card class="error-card" *ngIf="error && !loading">
+    <mat-card-content>
+      <div class="error-content">
+        <mat-icon color="warn">error</mat-icon>
+        <p>{{ error }}</p>
+      </div>
+      <button mat-raised-button color="primary" (click)="refreshData()">
+        Try Again
+      </button>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Dashboard Content -->
+  <div class="dashboard-content" *ngIf="!loading && !error && accountData">
+    <!-- Welcome Banner -->
+    <mat-card class="welcome-card">
+      <mat-card-content>
+        <h1 class="welcome-message">
+          <mat-icon class="welcome-icon">waving_hand</mat-icon>
+          Welcome, {{ accountData.holderName }}!
+        </h1>
+        <p class="welcome-subtitle">Account ID: {{ accountData.id }}</p>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Balance Card -->
+    <mat-card class="balance-card">
+      <mat-card-header>
+        <mat-icon mat-card-avatar class="balance-icon">account_balance_wallet</mat-icon>
+        <mat-card-title>Current Balance</mat-card-title>
+        <mat-card-subtitle>Account Status: {{ accountData.status }}</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="balance-amount">
+          ₹{{ currentBalance | number:'1.2-2' }}
+        </div>
+        <p class="last-updated">Last Updated: {{ accountData.updatedAt | date:'medium' }}</p>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Action Buttons -->
+    <div class="action-grid">
+      <mat-card class="action-card" (click)="viewAccountDetails(accountData.id)">
+        <mat-card-content>
+          <mat-icon color="primary">account_circle</mat-icon>
+          <h3>Account Details</h3>
+          <p>View complete account information</p>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="action-card" (click)="viewBalance(accountData.id)">
+        <mat-card-content>
+          <mat-icon color="accent">payments</mat-icon>
+          <h3>Balance Inquiry</h3>
+          <p>Check your current balance</p>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="action-card disabled">
+        <mat-card-content>
+          <mat-icon>send</mat-icon>
+          <h3>Transfer Money</h3>
+          <p>Available in Member 3 module</p>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="action-card disabled">
+        <mat-card-content>
+          <mat-icon>history</mat-icon>
+          <h3>Transaction History</h3>
+          <p>Available in Member 4 module</p>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- User Accounts List -->
+    <mat-card class="accounts-list-card" *ngIf="accountData.owner?.accounts">
+      <mat-card-header>
+        <mat-card-title>Your Accounts</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="account-item" *ngFor="let account of accountData.owner.accounts">
+          <div class="account-info">
+            <h4>{{ account.holderName }}</h4>
+            <p>Account #{{ account.id }} - {{ account.status }}</p>
+          </div>
+          <div class="account-balance">
+            <span class="balance">₹{{ account.balance | number:'1.2-2' }}</span>
+            <button 
+              mat-icon-button 
+              color="primary" 
+              (click)="viewAccountDetails(account.id)"
+              matTooltip="View Details">
+              <mat-icon>chevron_right</mat-icon>
+            </button>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

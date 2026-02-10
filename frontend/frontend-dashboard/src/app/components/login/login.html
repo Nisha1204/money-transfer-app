@@ -1,0 +1,59 @@
+<div class="login-container">
+  <mat-card class="login-card">
+    <mat-card-header>
+      <mat-card-title class="text-center">
+        <mat-icon class="login-icon">account_balance</mat-icon>
+        <h1>Money Transfer System</h1>
+        <p class="subtitle">Dashboard Login</p>
+      </mat-card-title>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <form #loginForm="ngForm" (ngSubmit)="onLogin()">
+        <mat-form-field class="full-width" appearance="outline">
+          <mat-label>Username</mat-label>
+          <input 
+            matInput 
+            type="text" 
+            [(ngModel)]="username" 
+            name="username"
+            required
+            placeholder="Enter username">
+          <mat-icon matPrefix>person</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field class="full-width" appearance="outline">
+          <mat-label>Password</mat-label>
+          <input 
+            matInput 
+            type="password" 
+            [(ngModel)]="password" 
+            name="password"
+            required
+            placeholder="Enter password">
+          <mat-icon matPrefix>lock</mat-icon>
+        </mat-form-field>
+
+        <div class="error-message" *ngIf="errorMessage">
+          <mat-icon>error</mat-icon>
+          {{ errorMessage }}
+        </div>
+
+        <button 
+          mat-raised-button 
+          color="primary" 
+          type="submit"
+          class="full-width login-button"
+          [disabled]="!loginForm.form.valid">
+          Login
+        </button>
+      </form>
+
+      <div class="demo-credentials">
+        <p><strong>Demo Credentials:</strong></p>
+        <p>Username: <code>user1</code></p>
+        <p>Password: <code>pwd</code></p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

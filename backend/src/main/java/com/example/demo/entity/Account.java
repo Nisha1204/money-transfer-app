@@ -1,5 +1,6 @@
 package com.example.demo.entity;
 
+import java.math.BigDecimal;
 import java.util.*;
 import com.example.demo.enums.AccountStatus;
 import com.example.demo.exception.AccountNotActiveException;
@@ -24,11 +25,12 @@ public class Account {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
     @Column(name="id")
-    private int id;
+    private Long id;
     @Column(name="holder_name")
     private String holderName;
     @Column(name="balance")
-    private float balance;
+    private BigDecimal balance;
+    @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private AccountStatus status;
 
@@ -64,29 +66,28 @@ public class Account {
 
 
     // Debit method: subtracts amount from balance
-    public boolean debit(float amount) {
-        if (amount <= 0) {
+    public void debit(BigDecimal amount) {
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Amount must be positive.");
         }
         if (!isActive()){
             throw new AccountNotActiveException(id);
         }
-        if (balance <= amount) {
+        if (balance.compareTo(amount) < 0) {
             throw new InsufficientBalanceException();
         }
-        balance -= amount;
-        return true;
+        this.balance=this.balance.subtract(amount);
     }
 
     // Credit method: adds amount to balance
-    public void credit(float amount) {
-        if (amount <= 0) {
+    public void credit(BigDecimal amount) {
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Amount must be positive.");
         }
         if(!isActive()){
             throw new AccountNotActiveException(id);
         }
-        balance += amount;
+        this.balance=this.balance.add(amount);
     }
 
     // Is account active? Assuming "ACTIVE" status means the account is active

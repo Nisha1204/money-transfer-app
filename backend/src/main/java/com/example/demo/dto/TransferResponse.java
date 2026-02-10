@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -16,11 +17,11 @@ import java.time.LocalDateTime;
 public class TransferResponse {
     private String id;
 
-    private int fromAccountId;
+    private Long fromAccountId;
 
-    private int toAccountId;
+    private Long toAccountId;
 
-    private float amount;
+    private BigDecimal amount;
 
     private TransactionStatus status;
 

@@ -5,18 +5,16 @@ import com.example.demo.dto.AccountResponse;
 import com.example.demo.entity.Account;
 import com.example.demo.entity.TransactionLog;
 import com.example.demo.exception.AccountNotFoundException;
-import com.example.demo.exception.InsufficientBalanceException;
 import com.example.demo.repository.AccountRepo;
 import com.example.demo.repository.TransactionLogRepo;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 //@Component("accountService")
@@ -43,13 +41,13 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public void deleteAccount(int id) {
+    public void deleteAccount(Long id) {
         logger.info("Deleting Account with ID: {}", id);
         accountRepository.deleteById(id);
     }
 
     @Override
-    public void updateAccount(int id, float balance) {
+    public void updateAccount(Long id, BigDecimal balance) {
         logger.info("Updating Account with ID: {} to balance: {} ", id, balance);
         // Changed to use your custom Exception for consistency
         Account acc = accountRepository.findById(id)
@@ -60,7 +58,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public AccountResponse getAccount(int id) {
+    public AccountResponse getAccount(Long id) {
         validateOwnership(id);
 
         logger.info("Getting Account with ID: {}", id);
@@ -115,6 +113,7 @@ public class AccountServiceImpl implements AccountService {
         return response;
     }
 
+    /*
     @Override
     @Transactional
     public void transfer(int fromId, int toId, float amount) {
@@ -157,20 +156,21 @@ public class AccountServiceImpl implements AccountService {
             //loggingService.saveLog(log);
         }
     }
+    */
 
     // In AccountServiceImpl.java
 
-    public float getBalance(int id) {
+    public BigDecimal getBalance(Long id) {
         // We can call getAccount(id) which now returns a DTO
         return getAccount(id).getBalance();
     }
 
-    public List<TransactionLog> getTransactions(int id) {
+    public List<TransactionLog> getTransactions(Long id) {
         validateOwnership(id);
         return transactionRepo.findByFromAccountIdOrToAccountId(id, id);
     }
 
-    public void validateOwnership(int accountId) {
+    public void validateOwnership(Long accountId) {
         String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
 
         Account account = accountRepository.findById(accountId)

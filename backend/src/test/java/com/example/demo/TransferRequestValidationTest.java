@@ -9,24 +9,24 @@ class TransferRequestValidationTest {
     @Test
     void testValidRequest() {
         TransferRequest request = new TransferRequest();
-        request.setFromAccountId(1);
-        request.setToAccountId(2);
-        request.setAmount(100.0f);
+        request.setFromAccountId(1L);
+        request.setToAccountId(2L);
+        request.setAmount(new java.math.BigDecimal("100.00"));
 
         assertAll("Verify Request Properties",
                 () -> assertEquals(1, request.getFromAccountId()),
                 () -> assertEquals(2, request.getToAccountId()),
-                () -> assertEquals(100.0f, request.getAmount())
+                () -> assertEquals(new java.math.BigDecimal("100.00"), request.getAmount())
         );
     }
 
     @Test
     void testInvalidAmount() {
         TransferRequest request = new TransferRequest();
-        request.setAmount(-10.0f);
+        request.setAmount(new java.math.BigDecimal("-10.00"));
 
         // Manual check for negative amounts
-        assertTrue(request.getAmount() <= 0, "Amount should be caught as non-positive");
+        assertTrue(request.getAmount().signum() <= 0, "Amount should be caught as non-positive");
     }
 
     @Test

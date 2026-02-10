@@ -4,8 +4,8 @@ import com.example.demo.entity.TransactionLog;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
-public interface TransactionLogRepo extends JpaRepository<TransactionLog, Integer> {
-    List<TransactionLog> findByFromAccountIdOrToAccountId(int fromId, int toId);
+public interface TransactionLogRepo extends JpaRepository<TransactionLog, String> {
+    List<TransactionLog> findByFromAccountIdOrToAccountId(Long fromId, Long toId);
 
-    boolean existsByIdempotencyKey(int idempotencyKey);
+    boolean existsByIdempotencyKey(String idempotencyKey);
 }

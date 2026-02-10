@@ -8,17 +8,18 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class AccountResponse {
-    private int id;
+    private Long id;
 
     private String holderName;
 
-    private float balance;
+    private BigDecimal balance;
 
     private AccountStatus status;
 

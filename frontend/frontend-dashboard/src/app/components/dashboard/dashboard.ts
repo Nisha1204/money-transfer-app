@@ -74,6 +74,10 @@ export class DashboardComponent implements OnInit {
     this.router.navigate(['/transfer', accountId]);
   }
 
+  viewTransactions(accountId: number): void {
+    this.router.navigate(['/transactions', accountId]);
+  }
+
   logout(): void {
     this.authService.logout();
     this.router.navigate(['/login']);

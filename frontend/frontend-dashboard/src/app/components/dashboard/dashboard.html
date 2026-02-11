@@ -85,7 +85,7 @@
         </mat-card-content>
       </mat-card>
 
-      <mat-card class="action-card disabled">
+      <mat-card class="action-card disabled" (click)="viewTransactions(accountData.id)">
         <mat-card-content>
           <mat-icon>history</mat-icon>
           <h3>Transaction History</h3>

@@ -5,6 +5,7 @@ import { AccountDetailsComponent } from './components/account-details/account-de
 import { BalanceViewComponent } from './components/balance-view/balance-view';
 import { authGuard } from './guards/auth.guard';
 import { TransferComponent } from './components/transfer/transfer';
+import { HistoryComponent } from './components/history/history.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -27,6 +28,11 @@ export const routes: Routes = [
   { 
     path: 'transfer/:id', 
     component: TransferComponent,
+    canActivate: [authGuard]
+  },
+  { 
+    path: 'transactions/:id', 
+    component: HistoryComponent,
     canActivate: [authGuard]
   },
   { path: '**', redirectTo: '/login' }

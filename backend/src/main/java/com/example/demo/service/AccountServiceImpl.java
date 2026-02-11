@@ -1,21 +1,20 @@
 package com.example.demo.service;
 
 
+import com.example.demo.dto.AccountResponse;
 import com.example.demo.entity.Account;
 import com.example.demo.entity.TransactionLog;
 import com.example.demo.exception.AccountNotFoundException;
-import com.example.demo.exception.InsufficientBalanceException;
 import com.example.demo.repository.AccountRepo;
 import com.example.demo.repository.TransactionLogRepo;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 //@Component("accountService")
@@ -42,29 +41,79 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public void deleteAccount(int id) {
+    public void deleteAccount(Long id) {
         logger.info("Deleting Account with ID: {}", id);
         accountRepository.deleteById(id);
     }
 
     @Override
-    public void updateAccount(int id, float balance ) {
+    public void updateAccount(Long id, BigDecimal balance) {
         logger.info("Updating Account with ID: {} to balance: {} ", id, balance);
-        Account acc = accountRepository.findById(id).orElseThrow(()-> new RuntimeException("Account not found"));
-        if (acc != null) {
-            acc.setBalance(balance);
-            accountRepository.save(acc);
-        }
+        // Changed to use your custom Exception for consistency
+        Account acc = accountRepository.findById(id)
+                .orElseThrow(() -> new AccountNotFoundException(id));
+
+        acc.setBalance(balance);
+        accountRepository.save(acc);
     }
 
     @Override
-    public Account getAccount (int id) {
-        validateOwnership(id); // If this fails, the code stops here
+    public AccountResponse getAccount(Long id) {
+        validateOwnership(id);
 
         logger.info("Getting Account with ID: {}", id);
-        return accountRepository.findById(id).orElseThrow(()-> new RuntimeException("Account not found"));
+        Account account = accountRepository.findById(id)
+                .orElseThrow(() -> new AccountNotFoundException(id));
+
+        return mapToResponse(account);
     }
 
+    /*
+    @Override
+    @Transactional
+    public void transfer(int fromId, int toId, float amount) {
+        // MOVE LOG INITIALIZATION TO THE TOP
+        TransactionLog log = new TransactionLog();
+        log.setFromAccountId(fromId);
+        log.setToAccountId(toId);
+        log.setAmount(amount);
+
+        try {
+            Account fromAcc = accountRepository.findById(fromId)
+                    .orElseThrow(() -> new RuntimeException("Sender account not found"));
+            Account toAcc = accountRepository.findById(toId)
+                    .orElseThrow(() -> new RuntimeException("Receiver account not found"));
+
+            if (fromAcc.debit(amount)) {
+                toAcc.credit(amount);
+                accountRepository.save(fromAcc);
+                accountRepository.save(toAcc);
+                log.setStatus(TransactionLog.TransactionStatus.SUCCESS);
+            } else {
+                throw new RuntimeException("Insufficient balance");
+            }
+        } catch (Exception e) {
+            log.setStatus(TransactionLog.TransactionStatus.FAILED);
+            log.setFailureReason(e.getMessage());
+            throw e;
+        } finally {
+            // Now 'fromAccountId' is guaranteed to be set before saving
+            transactionRepo.save(log);
+        }
+    }*/
+
+    private AccountResponse mapToResponse(Account account) {
+        AccountResponse response = new AccountResponse();
+        response.setId(account.getId());
+        response.setHolderName(account.getHolderName());
+        response.setBalance(account.getBalance());
+        response.setStatus(account.getStatus()); // Assumes Account entity has status
+        response.setUpdatedAt(account.getUpdatedAt()); // Assumes Account entity has updatedAt
+        response.setOwner(account.getOwner());
+        return response;
+    }
+
+    /*
     @Override
     @Transactional
     public void transfer(int fromId, int toId, float amount) {
@@ -107,19 +156,21 @@ public class AccountServiceImpl implements AccountService {
             //loggingService.saveLog(log);
         }
     }
+    */
 
     // In AccountServiceImpl.java
 
-    public float getBalance(int id) {
+    public BigDecimal getBalance(Long id) {
+        // We can call getAccount(id) which now returns a DTO
         return getAccount(id).getBalance();
     }
 
-    public List<TransactionLog> getTransactions(int id) {
+    public List<TransactionLog> getTransactions(Long id) {
         validateOwnership(id);
         return transactionRepo.findByFromAccountIdOrToAccountId(id, id);
     }
 
-    public void validateOwnership(int accountId) {
+    public void validateOwnership(Long accountId) {
         String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
 
         Account account = accountRepository.findById(accountId)

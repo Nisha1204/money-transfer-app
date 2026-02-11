@@ -1,5 +1,5 @@
 package com.example.demo.exception;
 
 public class AccountNotActiveException extends RuntimeException {
-    public AccountNotActiveException(int id) { super("Account " + id + " is not active."); }
+    public AccountNotActiveException(Long id) { super("Account " + id + " is not active."); }
 }

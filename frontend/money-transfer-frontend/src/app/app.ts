@@ -1,12 +1,31 @@
 import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { Router, RouterOutlet, NavigationEnd } from '@angular/router'; // Import NavigationEnd
+import { NavbarComponent } from './navbar/navbar';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  imports: [RouterOutlet,CommonModule, RouterOutlet, NavbarComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
 export class App {
-  protected readonly title = signal('money-transfer-frontend');
+  title = 'My Bank App';
+  showNavbar = true;
+
+  constructor(private router: Router) {
+    // Listen to route changes to decide whether to show the navbar
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe((event: any) => {
+      const excludedRoutes = ['/login', '/register'];
+      
+      // If the current URL is in the excluded list, hide navbar
+      // usage of 'includes' handles cases like '/login?returnUrl=...'
+      const isExcluded = excludedRoutes.some(route => event.url.includes(route));
+      
+      this.showNavbar = !isExcluded;
+    });
+  }
 }

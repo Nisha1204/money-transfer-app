@@ -1,20 +1,15 @@
 package com.example.demo.dto;
 
+import lombok.*;
+
 import java.time.LocalDateTime;
 
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class ErrorResponse {
+    private String errorCode;
     private int status;
     private String message;
-    private LocalDateTime timestamp;
-
-    public ErrorResponse(int status, String message) {
-        this.status = status;
-        this.message = message;
-        this.timestamp = LocalDateTime.now();
-    }
-
-    // Getters and Setters
-    public int getStatus() { return status; }
-    public String getMessage() { return message; }
-    public LocalDateTime getTimestamp() { return timestamp; }
+    private LocalDateTime timestamp = LocalDateTime.now();
 }

@@ -1,0 +1,8 @@
+<mat-toolbar color="primary" *ngIf="authService.isAuthenticated()">
+  <span>My Bank App</span>
+  <span class="spacer"></span>
+  
+  <button mat-button (click)="onLogout()">
+    Logout
+  </button>
+</mat-toolbar>

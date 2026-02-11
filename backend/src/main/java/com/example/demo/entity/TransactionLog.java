@@ -1,12 +1,14 @@
 package com.example.demo.entity;
 
+import com.example.demo.enums.TransactionStatus;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
+import org.springframework.data.domain.Persistable;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -15,65 +17,52 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class TransactionLog {
+public class TransactionLog implements Persistable<String> {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    // REMOVE @GeneratedValue(strategy = GenerationType.IDENTITY)
+    // IDENTITY is for auto-incrementing integers, not UUID strings.
+    private String id;
 
     @Column(name = "fromAccountId", nullable = false)
-    private int fromAccountId;
+    private Long fromAccountId;
 
     @Column(name = "toAccountId", nullable = false)
-    private int toAccountId;
+    private Long toAccountId;
 
-    private float amount;
+    @Column(nullable = false)
+    private BigDecimal amount;
 
     @Enumerated(EnumType.STRING)
     private TransactionStatus status;
 
-    @Column(name = "failureReason")
+    @Column(name = "failureReason", length = 1000) // Increase from default 255
     private String failureReason;
 
-    private int idempotencyKey;
+    private String idempotencyKey;
 
-    //@Column(name = "createdOn", insertable = false, updatable = false)
     @Column(name = "createdOn", nullable = false)
     private LocalDateTime createdOn;
 
-    public enum TransactionStatus {
-        SUCCESS, FAILED
-    }
-
     @PrePersist
     protected void onCreate() {
-        this.createdOn = LocalDateTime.now();
+        if (this.createdOn == null) {
+            this.createdOn = LocalDateTime.now();
+        }
     }
 
-    /*
-    // Getters and Setters
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
-    public int getFromAccountId() { return fromAccountId; }
-    public void setFromAccountId(int fromAccountId) { this.fromAccountId = fromAccountId; }
-    public int getToAccountId() { return toAccountId; }
-    public void setToAccountId(int toAccountId) { this.toAccountId = toAccountId; }
-    public float getAmount() { return amount; }
-    public void setAmount(float amount) { this.amount = amount; }
-    public TransactionStatus getStatus() { return status; }
-    public void setStatus(TransactionStatus status) { this.status = status; }
-    public String getFailureReason() { return failureReason; }
-    public void setFailureReason(String failureReason) { this.failureReason = failureReason; }
-    public int getIdempotencyKey() { return idempotencyKey; }
-    public void setIdempotencyKey(int idempotencyKey) { this.idempotencyKey = idempotencyKey; }
-
-    public LocalDateTime getCreatedOn() {
-        return createdOn;
+    @Override
+    public String getId() {
+        return id;
     }
 
-    public void setCreatedOn(LocalDateTime createdOn) {
-        this.createdOn = createdOn;
-    }
-
+    /**
+     * Because we manually set the ID, we must tell Hibernate
+     * that the entity is new if the createdOn timestamp hasn't been set yet.
      */
+    @Override
+    @Transient // Ensure this isn't persisted as a column
+    public boolean isNew() {
+        return createdOn == null;
+    }
 }

@@ -5,6 +5,11 @@
   font-size: 20px;
 }
 
+.hero {
+  background: rgb(15, 83, 25);
+  color: white;
+}
+
 .spacer {
   flex: 1 1 auto;
 }
@@ -52,8 +57,8 @@
 
 /* Welcome Card */
 .welcome-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: #eef4ed; 
+  color: black;
 }
 
 .welcome-message {
@@ -78,12 +83,13 @@
 
 /* Balance Card */
 .balance-card {
-  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-  color: white;
+  background: #eef4ed;
+  color: black;
+  box-shadow: 0 3px 1px -2px var(--v-shadow-key-umbra-opacity, rgba(0, 0, 0, .2)),0 2px 2px 0 var(--v-shadow-key-penumbra-opacity, rgba(0, 0, 0, .14)),0 1px 5px 0 var(--v-shadow-key-ambient-opacity, rgba(0, 0, 0, .12));
 }
 
 .balance-card mat-card-header {
-  color: white;
+  color: black;
 }
 
 .balance-icon {
@@ -186,7 +192,7 @@
 .balance {
   font-size: 20px;
   font-weight: bold;
-  color: #11998e;
+  color: rgb(15, 83, 25);
 }
 
 /* Responsive */

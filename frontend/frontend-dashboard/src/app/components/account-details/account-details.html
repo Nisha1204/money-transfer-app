@@ -1,11 +1,11 @@
-<div class="details-container">
-  <div class="header-actions">
+<mat-toolbar class="header-actions">
     <button mat-raised-button (click)="goBack()">
       <mat-icon>arrow_back</mat-icon>
       Back to Dashboard
     </button>
-  </div>
+</mat-toolbar>
 
+<div class="details-container">
   <!-- Loading -->
   <div class="loading-container" *ngIf="loading">
     <mat-spinner></mat-spinner>
@@ -29,7 +29,7 @@
     <mat-card class="main-card">
       <mat-card-header>
         <mat-icon mat-card-avatar class="account-icon">account_circle</mat-icon>
-        <mat-card-title>Account Information</mat-card-title>
+        <mat-card-title>ACCOUNT INFORMATION</mat-card-title>
         <mat-card-subtitle>Complete details for Account #{{ accountData.id }}</mat-card-subtitle>
       </mat-card-header>
       <mat-card-content>

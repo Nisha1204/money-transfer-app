@@ -4,6 +4,7 @@ import { DashboardComponent } from './components/dashboard/dashboard';
 import { AccountDetailsComponent } from './components/account-details/account-details';
 import { BalanceViewComponent } from './components/balance-view/balance-view';
 import { authGuard } from './guards/auth.guard';
+import { TransferComponent } from './components/transfer/transfer';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -21,6 +22,11 @@ export const routes: Routes = [
   { 
     path: 'balance/:id', 
     component: BalanceViewComponent,
+    canActivate: [authGuard]
+  },
+  { 
+    path: 'transfer/:id', 
+    component: TransferComponent,
     canActivate: [authGuard]
   },
   { path: '**', redirectTo: '/login' }

@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatToolbar } from '@angular/material/toolbar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AccountService } from '../../services/account.service';
 import { AccountResponse } from '../../models/account.model';
@@ -16,6 +17,7 @@ import { AccountResponse } from '../../models/account.model';
     MatCardModule,
     MatButtonModule,
     MatIconModule,
+    MatToolbar,
     MatProgressSpinnerModule
   ],
   templateUrl: './balance-view.html',

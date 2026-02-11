@@ -2,10 +2,17 @@
   padding: 24px;
   max-width: 1200px;
   margin: 0 auto;
+  
 }
 
 .header-actions {
   margin-bottom: 24px;
+  background: rgb(15, 83, 25);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 20px;
+  color: white;
 }
 
 .loading-container {
@@ -38,12 +45,12 @@
 
 /* Main Card */
 .main-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: #eef4ed;
+  color: black;
 }
 
 .main-card mat-card-header {
-  color: white;
+  color: black;
 }
 
 .account-icon {
@@ -55,12 +62,12 @@
 
 /* Owner Card */
 .owner-card {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  color: white;
+  background: #eef4ed;
+  color: black;
 }
 
 .owner-card mat-card-header {
-  color: white;
+  color: black;
 }
 
 .owner-icon {
@@ -118,11 +125,11 @@
 
 .balance-cell {
   font-weight: 600;
-  color: #11998e;
+  color: rgb(15, 83, 25);
 }
 
 .current-account {
-  background-color: #e3f2fd;
+  background-color: #eef4ed;
   font-weight: 500;
 }
 

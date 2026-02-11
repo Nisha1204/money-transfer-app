@@ -1,7 +1,7 @@
-<mat-toolbar color="primary">
+<mat-toolbar class="hero">
   <span class="toolbar-title">
     <mat-icon>account_balance</mat-icon>
-    Money Transfer Dashboard
+    MONEY TRANSFER APP
   </span>
   <span class="spacer"></span>
   <button mat-button (click)="refreshData()">
@@ -68,7 +68,6 @@
         <mat-card-content>
           <mat-icon color="primary">account_circle</mat-icon>
           <h3>Account Details</h3>
-          <p>View complete account information</p>
         </mat-card-content>
       </mat-card>
 
@@ -76,15 +75,13 @@
         <mat-card-content>
           <mat-icon color="accent">payments</mat-icon>
           <h3>Balance Inquiry</h3>
-          <p>Check your current balance</p>
         </mat-card-content>
       </mat-card>
 
-      <mat-card class="action-card disabled">
+      <mat-card class="action-card" (click)="doTransfer(accountData.id)">
         <mat-card-content>
           <mat-icon>send</mat-icon>
           <h3>Transfer Money</h3>
-          <p>Available in Member 3 module</p>
         </mat-card-content>
       </mat-card>
 
@@ -92,7 +89,6 @@
         <mat-card-content>
           <mat-icon>history</mat-icon>
           <h3>Transaction History</h3>
-          <p>Available in Member 4 module</p>
         </mat-card-content>
       </mat-card>
     </div>

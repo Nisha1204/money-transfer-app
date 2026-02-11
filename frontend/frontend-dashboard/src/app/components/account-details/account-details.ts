@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
@@ -19,6 +20,7 @@ import { AccountResponse } from '../../models/account.model';
     MatButtonModule,
     MatIconModule,
     MatChipsModule,
+    MatToolbarModule,
     MatProgressSpinnerModule,
     MatTableModule
   ],

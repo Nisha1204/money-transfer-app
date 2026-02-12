@@ -20,4 +20,6 @@ public interface AccountService {
     BigDecimal getBalance(Long id);
 
     List<TransactionLog> getTransactions(Long id);
+
+    List<AccountResponse> getAccountsByUsername(String username);
 }

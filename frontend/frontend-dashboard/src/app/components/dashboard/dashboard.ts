@@ -6,6 +6,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatTabsModule } from '@angular/material/tabs'; // Added
 import { AuthService } from '../../services/auth.service';
 import { AccountService } from '../../services/account.service';
 import { AccountResponse } from '../../models/account.model';
@@ -19,17 +21,18 @@ import { AccountResponse } from '../../models/account.model';
     MatButtonModule,
     MatIconModule,
     MatToolbarModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatTooltipModule,
+    MatTabsModule // Added
   ],
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.css']
 })
 export class DashboardComponent implements OnInit {
-  accountData: AccountResponse | null = null;
-  currentBalance: number = 0;
+  accounts: AccountResponse[] = []; 
+  selectedAccount: AccountResponse | null = null; // Renamed for clarity
   loading = true;
   error = '';
-  selectedAccountId = 1; // Default account ID
 
   constructor(
     private authService: AuthService,
@@ -39,39 +42,51 @@ export class DashboardComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadAccountData();
+    this.loadUserData();
   }
 
-  loadAccountData(): void {
+  loadUserData(): void {
     this.loading = true;
     this.error = '';
-
-    this.accountService.getAccount(this.selectedAccountId).subscribe({
+    
+    this.accountService.getMyAccounts().subscribe({
       next: (data) => {
-        console.log('Data received in component:', data); 
-        this.accountData = data;
-        this.currentBalance = data.balance;
+        this.accounts = data;
+        if (data && data.length > 0) {
+          // Default to the first account on load
+          this.selectedAccount = data[0];
+        }
         this.loading = false;
-        this.cdr.detectChanges(); 
+        this.cdr.detectChanges();
       },
       error: (err) => {
-        this.error = 'Failed to load account data.';
+        console.error('Dashboard error:', err);
+        this.error = 'Could not retrieve your accounts. Please try again.';
         this.loading = false;
-        this.cdr.detectChanges(); 
+        this.cdr.detectChanges();
       }
     });
   }
 
-  viewAccountDetails(accountId: number): void {
-    this.router.navigate(['/account-details', accountId]);
+  // New method to handle tab selection
+  onTabChange(index: number): void {
+    this.selectedAccount = this.accounts[index];
+  }
+  
+  viewAccountDetails(id: number): void { 
+    this.router.navigate(['/account-details', id]); 
   }
 
-  viewBalance(accountId: number): void {
-    this.router.navigate(['/balance', accountId]);
+  viewBalance(id: number): void {
+    this.router.navigate(['/balance', id]);
   }
 
-  doTransfer(accountId: number): void {
-    this.router.navigate(['/transfer', accountId]);
+  doTransfer(id: number): void {
+    this.router.navigate(['/transfer', id]);
+  }
+
+  viewTransactions(id: number): void {
+    this.router.navigate(['/transactions', id]);
   }
 
   logout(): void {
@@ -80,6 +95,6 @@ export class DashboardComponent implements OnInit {
   }
 
   refreshData(): void {
-    this.loadAccountData();
+    this.loadUserData();
   }
 }

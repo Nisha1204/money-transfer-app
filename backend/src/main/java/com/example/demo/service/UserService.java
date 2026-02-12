@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class UserService {
 
@@ -27,5 +29,17 @@ public class UserService {
         user.setRole(dto.getRole() != null ? dto.getRole() : "USER");
 
         userRepository.save(user);
+    }
+
+    public boolean validateUser(String username, String password) {
+        Optional<User> userOptional = userRepository.findByUsername(username);
+
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+
+            return passwordEncoder.matches(password, user.getPassword());
+        }
+
+        return false; // User not found
     }
 }

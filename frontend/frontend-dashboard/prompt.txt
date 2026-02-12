@@ -1,0 +1,393 @@
+app.routes.js
+
+import { Routes } from '@angular/router';
+import { LoginComponent } from './components/login/login';
+import { DashboardComponent } from './components/dashboard/dashboard';
+import { AccountDetailsComponent } from './components/account-details/account-details';
+import { BalanceViewComponent } from './components/balance-view/balance-view';
+import { authGuard } from './guards/auth.guard';
+import { TransferComponent } from './components/transfer/transfer';
+
+export const routes: Routes = [
+  { path: '', redirectTo: '/login', pathMatch: 'full' },
+  { path: 'login', component: LoginComponent },
+  { 
+    path: 'dashboard', 
+    component: DashboardComponent,
+    canActivate: [authGuard]
+  },
+  { 
+    path: 'account-details/:id', 
+    component: AccountDetailsComponent,
+    canActivate: [authGuard]
+  },
+  { 
+    path: 'balance/:id', 
+    component: BalanceViewComponent,
+    canActivate: [authGuard]
+  },
+  { 
+    path: 'transfer/:id', 
+    component: TransferComponent,
+    canActivate: [authGuard]
+  },
+  { path: '**', redirectTo: '/login' }
+];
+
+login.ts:
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { AuthService } from '../../services/auth.service';
+
+@Component({
+  selector: 'app-login',
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule
+  ],
+  templateUrl: './login.html',
+  styleUrls: ['./login.css']
+})
+export class LoginComponent {
+  username = '';
+  password = '';
+  errorMessage = '';
+
+  constructor(
+    private authService: AuthService,
+    private router: Router
+  ) {}
+
+  onLogin(): void {
+    this.errorMessage = '';
+
+    if (!this.username || !this.password) {
+      this.errorMessage = 'Username and password are required';
+      return;
+    }
+
+    // For demo purposes, we accept any credentials
+    // In production, you'd validate against the backend
+    this.authService.login(this.username, this.password);
+    this.router.navigate(['/dashboard']);
+  }
+}
+
+dashboard.ts:
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { AuthService } from '../../services/auth.service';
+import { AccountService } from '../../services/account.service';
+import { AccountResponse } from '../../models/account.model';
+
+@Component({
+  selector: 'app-dashboard',
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    MatToolbarModule,
+    MatProgressSpinnerModule
+  ],
+  templateUrl: './dashboard.html',
+  styleUrls: ['./dashboard.css']
+})
+export class DashboardComponent implements OnInit {
+  accountData: AccountResponse | null = null;
+  currentBalance: number = 0;
+  loading = true;
+  error = '';
+  selectedAccountId = 1; // Default account ID
+
+  constructor(
+    private authService: AuthService,
+    private accountService: AccountService,
+    private router: Router,
+    private cdr: ChangeDetectorRef
+  ) {}
+
+  ngOnInit(): void {
+    this.loadAccountData();
+  }
+
+  loadAccountData(): void {
+    this.loading = true;
+    this.error = '';
+
+    this.accountService.getAccount(this.selectedAccountId).subscribe({
+      next: (data) => {
+        console.log('Data received in component:', data); 
+        this.accountData = data;
+        this.currentBalance = data.balance;
+        this.loading = false;
+        this.cdr.detectChanges(); 
+      },
+      error: (err) => {
+        this.error = 'Failed to load account data.';
+        this.loading = false;
+        this.cdr.detectChanges(); 
+      }
+    });
+  }
+
+  viewAccountDetails(accountId: number): void {
+    this.router.navigate(['/account-details', accountId]);
+  }
+
+  viewBalance(accountId: number): void {
+    this.router.navigate(['/balance', accountId]);
+  }
+
+  doTransfer(accountId: number): void {
+    this.router.navigate(['/transfer', accountId]);
+  }
+
+  logout(): void {
+    this.authService.logout();
+    this.router.navigate(['/login']);
+  }
+
+  refreshData(): void {
+    this.loadAccountData();
+  }
+}
+
+dashboard.html:
+<mat-toolbar class="hero">
+  <span class="toolbar-title">
+    <mat-icon>account_balance</mat-icon>
+    MONEY TRANSFER APP
+  </span>
+  <span class="spacer"></span>
+  <button mat-button (click)="refreshData()">
+    <mat-icon>refresh</mat-icon>
+    Refresh
+  </button>
+  <button mat-button (click)="logout()">
+    <mat-icon>logout</mat-icon>
+    Logout
+  </button>
+</mat-toolbar>
+
+<div class="dashboard-container">
+  <!-- Loading Spinner -->
+  <div class="loading-container" *ngIf="loading">
+    <mat-spinner></mat-spinner>
+    <p>Loading account data...</p>
+  </div>
+
+  <!-- Error Message -->
+  <mat-card class="error-card" *ngIf="error && !loading">
+    <mat-card-content>
+      <div class="error-content">
+        <mat-icon color="warn">error</mat-icon>
+        <p>{{ error }}</p>
+      </div>
+      <button mat-raised-button color="primary" (click)="refreshData()">
+        Try Again
+      </button>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Dashboard Content -->
+  <div class="dashboard-content" *ngIf="!loading && !error && accountData">
+    <!-- Welcome Banner -->
+    <mat-card class="welcome-card">
+      <mat-card-content>
+        <h1 class="welcome-message">
+          <mat-icon class="welcome-icon">waving_hand</mat-icon>
+          Welcome, {{ accountData.holderName }}!
+        </h1>
+        <p class="welcome-subtitle">Account ID: {{ accountData.id }}</p>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Balance Card -->
+    <mat-card class="balance-card">
+      <mat-card-header>
+        <mat-icon mat-card-avatar class="balance-icon">account_balance_wallet</mat-icon>
+        <mat-card-title>Current Balance</mat-card-title>
+        <mat-card-subtitle>Account Status: {{ accountData.status }}</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="balance-amount">
+          ₹{{ currentBalance | number:'1.2-2' }}
+        </div>
+        <p class="last-updated">Last Updated: {{ accountData.updatedAt | date:'medium' }}</p>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Action Buttons -->
+    <div class="action-grid">
+      <mat-card class="action-card" (click)="viewAccountDetails(accountData.id)">
+        <mat-card-content>
+          <mat-icon color="primary">account_circle</mat-icon>
+          <h3>Account Details</h3>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="action-card" (click)="viewBalance(accountData.id)">
+        <mat-card-content>
+          <mat-icon color="accent">payments</mat-icon>
+          <h3>Balance Inquiry</h3>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="action-card" (click)="doTransfer(accountData.id)">
+        <mat-card-content>
+          <mat-icon>send</mat-icon>
+          <h3>Transfer Money</h3>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="action-card disabled">
+        <mat-card-content>
+          <mat-icon>history</mat-icon>
+          <h3>Transaction History</h3>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- User Accounts List -->
+    <mat-card class="accounts-list-card" *ngIf="accountData.owner?.accounts">
+      <mat-card-header>
+        <mat-card-title>Your Accounts</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="account-item" *ngFor="let account of accountData.owner.accounts">
+          <div class="account-info">
+            <h4>{{ account.holderName }}</h4>
+            <p>Account #{{ account.id }} - {{ account.status }}</p>
+          </div>
+          <div class="account-balance">
+            <span class="balance">₹{{ account.balance | number:'1.2-2' }}</span>
+            <button 
+              mat-icon-button 
+              color="primary" 
+              (click)="viewAccountDetails(account.id)"
+              matTooltip="View Details">
+              <mat-icon>chevron_right</mat-icon>
+            </button>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>
+
+accountservice.ts
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { AccountResponse } from '../models/account.model';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class AccountService {
+  private readonly API_BASE = 'http://localhost:8080/api/v1';
+
+  constructor(private http: HttpClient) {}
+
+  getAccount(accountId: number): Observable<AccountResponse> {
+    return this.http.get<AccountResponse>(`${this.API_BASE}/accounts/${accountId}`);
+  }
+
+  getBalance(accountId: number): Observable<number> {
+    return this.http.get<number>(`${this.API_BASE}/accounts/${accountId}/balance`);
+  }
+}
+
+auth.service.ts:
+import { Injectable } from '@angular/core';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class AuthService {
+  private readonly AUTH_KEY = 'auth_credentials';
+
+  constructor() {}
+
+  login(username: string, password: string): boolean {
+    // Store credentials in base64 format for Basic Auth
+    const credentials = btoa(`${username}:${password}`);
+    localStorage.setItem(this.AUTH_KEY, credentials);
+    return true;
+  }
+
+  logout(): void {
+    localStorage.removeItem(this.AUTH_KEY);
+  }
+
+  isAuthenticated(): boolean {
+    return !!this.getToken();
+  }
+
+  getToken(): string | null {
+    return localStorage.getItem(this.AUTH_KEY);
+  }
+
+  getAuthHeader(): string {
+    const token = this.getToken();
+    return token ? `Basic ${token}` : '';
+  }
+}
+
+account.model.ts:
+export interface User {
+  id: number;
+  username: string;
+  role: string;
+  accounts: Account[];
+}
+
+export interface Account {
+  id: number;
+  holderName: string;
+  balance: number;
+  status: AccountStatus;
+  version: number;
+  updatedAt: string;
+  active: boolean;
+}
+
+export interface AccountResponse {
+  id: number;
+  holderName: string;
+  balance: number;
+  status: AccountStatus;
+  updatedAt: string;
+  owner: User;
+}
+
+export enum AccountStatus {
+  ACTIVE = 'ACTIVE',
+  LOCKED = 'LOCKED',
+  CLOSED = 'CLOSED'
+}
+
+
+
+here in the dashboard, all accounts of the user are displayed below but if the user has many, accounts, then in the top of the dashboard, only the default account id is getting displayed. i want the app to use the username in login to fetch the accounts connected to that  account and display all accounts in the dashboard with functionality that creates as many tabs as there are accounts. i dont want the account_id field to be default. give the code changes. If you need any other files to give the correct code, then let me know

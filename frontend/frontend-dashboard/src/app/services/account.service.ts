@@ -18,4 +18,8 @@ export class AccountService {
   getBalance(accountId: number): Observable<number> {
     return this.http.get<number>(`${this.API_BASE}/accounts/${accountId}/balance`);
   }
+
+  getMyAccounts(): Observable<AccountResponse[]> {
+    return this.http.get<AccountResponse[]>(`${this.API_BASE}/accounts/my-accounts`);
+  }
 }

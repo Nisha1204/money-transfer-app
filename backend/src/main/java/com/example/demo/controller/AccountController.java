@@ -7,13 +7,15 @@ import com.example.demo.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1")
-@CrossOrigin(origins = "http://localhost:4200")
 public class AccountController {
 
 
@@ -37,9 +39,19 @@ public class AccountController {
     }
 
     @PostMapping("/accounts/create")
-    public String createAccount(@RequestParam String holderName) {
+    public ResponseEntity<Map<String, String>> createAccount(@RequestParam String holderName) {
         accountService.createAccount(holderName);
-        return "Account created successfully for " + holderName;
+
+        return ResponseEntity.ok(Collections.singletonMap(
+                "message", "Account created successfully for " + holderName
+        ));
+    }
+
+    @GetMapping("/accounts/my-accounts")
+    public ResponseEntity<List<AccountResponse>> getMyAccounts(Authentication authentication) {
+        String username = authentication.getName(); // Extracts username from the Security Context
+        List<AccountResponse> accounts = accountService.getAccountsByUsername(username);
+        return ResponseEntity.ok(accounts);
     }
 
 }

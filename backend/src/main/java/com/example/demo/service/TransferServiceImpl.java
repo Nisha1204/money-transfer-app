@@ -40,8 +40,6 @@ public class TransferServiceImpl implements TransferService {
             return executeTransfer(request, transactionId);
 
         } catch (AccountNotFoundException | AccessDeniedException | DuplicateTransferException ex) {
-            // DO NOT try to save to DB here. These are "pre-check" failures.
-            // Just re-throw so the GlobalExceptionHandler can pick up the clean error.
             throw ex;
         } catch (Exception ex) {
             try {

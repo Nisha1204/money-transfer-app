@@ -1,30 +1,27 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router , RouterLink} from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { AuthService } from '../../services/auth.service';
+import { AuthService } from '../../services/auth.service'; // Check this path
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-login',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
+    RouterLink,
     MatCardModule,
-    MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatIconModule
+    CommonModule
   ],
-  templateUrl: './login.html',
-  styleUrls: ['./login.css']
+  templateUrl: './login.html'
 })
-export class LoginComponent {
+export class Login {
+
   username = '';
   password = '';
   errorMessage = '';
@@ -34,17 +31,30 @@ export class LoginComponent {
     private router: Router
   ) {}
 
-  onLogin(): void {
-    this.errorMessage = '';
-
-    if (!this.username || !this.password) {
+  submit(): void {
+    if (!this.username.trim() || !this.password.trim()) {
       this.errorMessage = 'Username and password are required';
       return;
     }
 
-    // For demo purposes, we accept any credentials
-    // In production, you'd validate against the backend
-    this.authService.login(this.username, this.password);
-    this.router.navigate(['/dashboard']);
+    this.errorMessage = ''; 
+    
+    // Optional: Clear old tokens before trying a fresh login
+    localStorage.removeItem('auth_token'); 
+
+    this.authService.login(this.username, this.password).subscribe({
+      next: (response) => {
+        this.router.navigate(['/dashboard']);
+      },
+      error: (err) => {
+        console.error('Login failed:', err);
+        if (err.error && err.error.message) {
+          this.errorMessage = err.error.message;
+        } else {
+          this.errorMessage = 'Invalid username or password';
+        }
+        this.authService.logout();
+      }
+    });
   }
 }

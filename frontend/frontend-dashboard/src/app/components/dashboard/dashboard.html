@@ -15,13 +15,11 @@
 </mat-toolbar>
 
 <div class="dashboard-container">
-  <!-- Loading Spinner -->
   <div class="loading-container" *ngIf="loading">
     <mat-spinner></mat-spinner>
-    <p>Loading account data...</p>
+    <p>Loading your accounts...</p>
   </div>
 
-  <!-- Error Message -->
   <mat-card class="error-card" *ngIf="error && !loading">
     <mat-card-content>
       <div class="error-content">
@@ -34,88 +32,83 @@
     </mat-card-content>
   </mat-card>
 
-  <!-- Dashboard Content -->
-  <div class="dashboard-content" *ngIf="!loading && !error && accountData">
-    <!-- Welcome Banner -->
+  <div class="dashboard-content" *ngIf="!loading && !error && accounts.length > 0">
+    
     <mat-card class="welcome-card">
       <mat-card-content>
         <h1 class="welcome-message">
           <mat-icon class="welcome-icon">waving_hand</mat-icon>
-          Welcome, {{ accountData.holderName }}!
+          Welcome, {{ accounts[0].holderName }}!
         </h1>
-        <p class="welcome-subtitle">Account ID: {{ accountData.id }}</p>
+        <p class="welcome-subtitle">You have {{ accounts.length }} active account(s)</p>
       </mat-card-content>
     </mat-card>
 
-    <!-- Balance Card -->
-    <mat-card class="balance-card">
-      <mat-card-header>
-        <mat-icon mat-card-avatar class="balance-icon">account_balance_wallet</mat-icon>
-        <mat-card-title>Current Balance</mat-card-title>
-        <mat-card-subtitle>Account Status: {{ accountData.status }}</mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content>
-        <div class="balance-amount">
-          ₹{{ currentBalance | number:'1.2-2' }}
-        </div>
-        <p class="last-updated">Last Updated: {{ accountData.updatedAt | date:'medium' }}</p>
-      </mat-card-content>
-    </mat-card>
+    <mat-tab-group 
+      (selectedIndexChange)="onTabChange($event)" 
+      backgroundColor="primary" 
+      class="account-tabs">
+      
+      <mat-tab *ngFor="let acc of accounts">
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">account_balance</mat-icon>
+          Account #{{ acc.id }}
+        </ng-template>
+      </mat-tab>
+    </mat-tab-group>
 
-    <!-- Action Buttons -->
-    <div class="action-grid">
-      <mat-card class="action-card" (click)="viewAccountDetails(accountData.id)">
+    <div class="selected-account-view" *ngIf="selectedAccount">
+      <mat-card class="balance-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar class="balance-icon">account_balance_wallet</mat-icon>
+          <mat-card-title>{{ selectedAccount.holderName }}'s Balance</mat-card-title>
+          <mat-card-subtitle>Status: {{ selectedAccount.status }}</mat-card-subtitle>
+        </mat-card-header>
         <mat-card-content>
-          <mat-icon color="primary">account_circle</mat-icon>
-          <h3>Account Details</h3>
+          <div class="balance-amount">
+            ₹{{ selectedAccount.balance | number:'1.2-2' }}
+          </div>
+          <p class="last-updated" *ngIf="selectedAccount.updatedAt">
+            Last Updated: {{ selectedAccount.updatedAt | date:'medium' }}
+          </p>
         </mat-card-content>
       </mat-card>
 
-      <mat-card class="action-card" (click)="viewBalance(accountData.id)">
-        <mat-card-content>
-          <mat-icon color="accent">payments</mat-icon>
-          <h3>Balance Inquiry</h3>
-        </mat-card-content>
-      </mat-card>
+      <div class="action-grid">
+        <mat-card class="action-card" (click)="viewAccountDetails(selectedAccount.id)">
+          <mat-card-content>
+            <mat-icon color="primary">account_circle</mat-icon>
+            <h3>Account Details</h3>
+          </mat-card-content>
+        </mat-card>
 
-      <mat-card class="action-card" (click)="doTransfer(accountData.id)">
-        <mat-card-content>
-          <mat-icon>send</mat-icon>
-          <h3>Transfer Money</h3>
-        </mat-card-content>
-      </mat-card>
+        <mat-card class="action-card" (click)="viewBalance(selectedAccount.id)">
+          <mat-card-content>
+            <mat-icon color="accent">payments</mat-icon>
+            <h3>Balance Inquiry</h3>
+          </mat-card-content>
+        </mat-card>
 
-      <mat-card class="action-card disabled">
-        <mat-card-content>
-          <mat-icon>history</mat-icon>
-          <h3>Transaction History</h3>
-        </mat-card-content>
-      </mat-card>
+        <mat-card class="action-card" (click)="doTransfer(selectedAccount.id)">
+          <mat-card-content>
+            <mat-icon>send</mat-icon>
+            <h3>Transfer Money</h3>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="action-card" (click)="viewTransactions(selectedAccount.id)">
+          <mat-card-content>
+            <mat-icon>history</mat-icon>
+            <h3>Transaction History</h3>
+          </mat-card-content>
+        </mat-card>
+      </div>
     </div>
+  </div>
 
-    <!-- User Accounts List -->
-    <mat-card class="accounts-list-card" *ngIf="accountData.owner?.accounts">
-      <mat-card-header>
-        <mat-card-title>Your Accounts</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <div class="account-item" *ngFor="let account of accountData.owner.accounts">
-          <div class="account-info">
-            <h4>{{ account.holderName }}</h4>
-            <p>Account #{{ account.id }} - {{ account.status }}</p>
-          </div>
-          <div class="account-balance">
-            <span class="balance">₹{{ account.balance | number:'1.2-2' }}</span>
-            <button 
-              mat-icon-button 
-              color="primary" 
-              (click)="viewAccountDetails(account.id)"
-              matTooltip="View Details">
-              <mat-icon>chevron_right</mat-icon>
-            </button>
-          </div>
-        </div>
-      </mat-card-content>
-    </mat-card>
+  <div class="empty-state" *ngIf="!loading && !error && accounts.length === 0">
+    <mat-icon>info</mat-icon>
+    <p>You don't have any accounts linked yet.</p>
+    <button mat-raised-button color="primary">Open New Account</button>
   </div>
 </div>

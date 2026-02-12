@@ -68,39 +68,6 @@ public class AccountServiceImpl implements AccountService {
         return mapToResponse(account);
     }
 
-    /*
-    @Override
-    @Transactional
-    public void transfer(int fromId, int toId, float amount) {
-        // MOVE LOG INITIALIZATION TO THE TOP
-        TransactionLog log = new TransactionLog();
-        log.setFromAccountId(fromId);
-        log.setToAccountId(toId);
-        log.setAmount(amount);
-
-        try {
-            Account fromAcc = accountRepository.findById(fromId)
-                    .orElseThrow(() -> new RuntimeException("Sender account not found"));
-            Account toAcc = accountRepository.findById(toId)
-                    .orElseThrow(() -> new RuntimeException("Receiver account not found"));
-
-            if (fromAcc.debit(amount)) {
-                toAcc.credit(amount);
-                accountRepository.save(fromAcc);
-                accountRepository.save(toAcc);
-                log.setStatus(TransactionLog.TransactionStatus.SUCCESS);
-            } else {
-                throw new RuntimeException("Insufficient balance");
-            }
-        } catch (Exception e) {
-            log.setStatus(TransactionLog.TransactionStatus.FAILED);
-            log.setFailureReason(e.getMessage());
-            throw e;
-        } finally {
-            // Now 'fromAccountId' is guaranteed to be set before saving
-            transactionRepo.save(log);
-        }
-    }*/
 
     private AccountResponse mapToResponse(Account account) {
         AccountResponse response = new AccountResponse();
@@ -112,51 +79,6 @@ public class AccountServiceImpl implements AccountService {
         response.setOwner(account.getOwner());
         return response;
     }
-
-    /*
-    @Override
-    @Transactional
-    public void transfer(int fromId, int toId, float amount) {
-        if (fromId == toId) {
-            throw new IllegalArgumentException("Source and destination accounts must be different.");
-        }
-
-        TransactionLog log = new TransactionLog();
-        log.setFromAccountId(fromId);
-        log.setToAccountId(toId);
-        log.setAmount(amount);
-
-        try {
-            Account fromAcc = accountRepository.findById(fromId)
-                    .orElseThrow(() -> new AccountNotFoundException(fromId));
-            Account toAcc = accountRepository.findById(toId)
-                    .orElseThrow(() -> new AccountNotFoundException(toId));
-
-            // Ownership Check (Security)
-            String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
-            if (!fromAcc.getOwner().getUsername().equals(currentUsername)) {
-                throw new AccessDeniedException("Unauthorized: You do not own the source account.");
-            }
-
-            if (fromAcc.debit(amount)) {
-                toAcc.credit(amount);
-                accountRepository.save(fromAcc);
-                accountRepository.save(toAcc);
-                log.setStatus(TransactionLog.TransactionStatus.SUCCESS);
-            } else {
-                throw new InsufficientBalanceException();
-            }
-        } catch (Exception e) {
-            log.setStatus(TransactionLog.TransactionStatus.FAILED);
-            log.setFailureReason(e.getMessage());
-            throw e; // This triggers the rollback of the money movement
-        } finally {
-            // Use the separate service to ensure the log is saved regardless of rollback
-            //Object loggingService;
-            //loggingService.saveLog(log);
-        }
-    }
-    */
 
     // In AccountServiceImpl.java
 

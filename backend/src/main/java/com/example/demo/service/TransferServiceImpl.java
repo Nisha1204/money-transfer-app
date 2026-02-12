@@ -30,6 +30,7 @@ public class TransferServiceImpl implements TransferService {
     @Override
     @Transactional(noRollbackFor = {InsufficientBalanceException.class, AccountNotFoundException.class})
     public TransferResponse transfer(TransferRequest request) {
+
         String transactionId = "TRX-" + UUID.randomUUID();
 
         try {
@@ -39,7 +40,12 @@ public class TransferServiceImpl implements TransferService {
 
             return executeTransfer(request, transactionId);
 
-        } catch (Exception ex) {
+        } catch (AccountNotFoundException | AccessDeniedException | DuplicateTransferException ex) {
+            // DO NOT try to save to DB here. These are "pre-check" failures.
+            // Just re-throw so the GlobalExceptionHandler can pick up the clean error.
+            throw ex;
+        }
+        catch (Exception ex) {
             try {
                 TransactionLog log = new TransactionLog();
                 log.setId(transactionId);

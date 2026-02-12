@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
+import { catchError, throwError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -12,15 +13,22 @@ export class TransferService {
 
   constructor(private http: HttpClient) {}
 
-  executeTransfer(fromAccountId: number, toAccountId: number, amount: number): Observable<any> {
-    const payload = {
-      fromAccountId,
-      toAccountId,
-      amount,
-      idempotencyKey: uuidv4()
-    };
-    
-    // Authorization header is automatically added by the interceptor
-    return this.http.post(this.apiUrl, payload, { responseType: 'json' });
+  getAccountData(id: number): Observable<any> {
+    return this.http.get<any>(`http://localhost:8080/api/v1/accounts/${id}`);
   }
+
+
+  executeTransfer(fromAccountId: number, toAccountId: number, amount: number): Observable<any> {
+  const payload = { fromAccountId, toAccountId, amount, idempotencyKey: uuidv4() };
+  
+  return this.http.post(this.apiUrl, payload).pipe(
+    catchError((error) => {
+      // Log for debugging
+      console.error('Service log:', error);
+      // Re-throw the entire error object so the component can read error.error.message
+      return throwError(() => error); 
+    })
+  );
+}
+
 }

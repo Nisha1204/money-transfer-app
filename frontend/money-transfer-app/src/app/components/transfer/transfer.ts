@@ -1,171 +1,154 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormGroupDirective } from '@angular/forms';
 import { TransferService } from '../../services/transfer-service';
-import { finalize } from 'rxjs'; // Add this import
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatSnackBar } from '@angular/material/snack-bar'; // Import SnackBar
+import { finalize } from 'rxjs'; // 1. Add this import
 
 @Component({
   selector: 'app-transfer',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatButtonModule, MatIconModule],
   templateUrl: './transfer.html',
   styleUrls: ['./transfer.css']
 })
+
 export class TransferComponent implements OnInit {
+  @ViewChild(FormGroupDirective) formGroupDirective!: FormGroupDirective;
+
   transferForm: FormGroup;
   accounts: any[] = [];
   loading = false;
-  message = '';
-  isError = false;
-  toAccountValid = false; // New state to track if destination exists
+  toAccountValid = false;
 
-  constructor(private fb: FormBuilder, private transferService: TransferService, private cdr: ChangeDetectorRef) {
+  constructor(
+    private fb: FormBuilder, 
+    private transferService: TransferService, 
+    private cdr: ChangeDetectorRef,
+    private snackBar: MatSnackBar // Inject SnackBar
+  ) {
     this.transferForm = this.fb.group({
-      fromAccountId: ['', Validators.required], // Removed disabled:true to allow programmatic reset
-      toAccountId: ['', Validators.required],
+      fromAccountId: ['', Validators.required], 
+      toAccountId: [{ value: '', disabled: true }, [Validators.required, Validators.pattern('^[0-9]*$')]],
       amount: [{ value: '', disabled: true }, [Validators.required, Validators.min(0.01)]]
     });
   }
 
-  // ... keep ngOnInit and loadUserAccounts as they are ...
   ngOnInit() {
-    setTimeout(() => {
-    this.loadUserAccounts(1); 
-  });
+    this.loadUserAccounts(1);
   }
 
-loadUserAccounts(accountId: number) {
-  this.loading = true;
-  this.transferService.getAccountData(accountId).subscribe({
-    next: (data) => {
-      if (data && data.owner && data.owner.accounts) {
-        this.accounts = data.owner.accounts;
-        
-        // Find the account we just used
-        const selected = this.accounts.find(acc => acc.id === Number(accountId));
-        if (selected) {
-          // IMPORTANT: Update the form so the dropdown and readonly input sync
-          this.transferForm.patchValue({ fromAccountId: selected.id }, { emitEvent: false });
-          this.message = `Updated Balance: $${selected.balance}`;
-        }
+  loadUserAccounts(accountId: number) {
+    this.transferService.getAccountData(accountId).subscribe({
+      next: (data) => {
+        if (data?.owner?.accounts) this.accounts = data.owner.accounts;
       }
-      this.loading = false;
-      this.cdr.detectChanges();
-    },
-    error: (err) => {
-      this.loading = false;
-      this.isError = true;
-      this.message = err.error?.message || 'Error loading accounts.';
-      this.cdr.detectChanges();
-    }
-  });
-}
-
-onAccountSelect(accountId: any) {
-  const id = Number(accountId);
-  const selected = this.accounts.find(a => a.id === id);
-  
-  if (selected) {
-    this.transferForm.patchValue({ fromAccountId: selected.id });
-    this.message = `Selected Account Balance: $${selected.balance}`;
-    this.isError = false;
-    this.validateToAccount();
-  }
-  this.cdr.detectChanges();
-}
-
-  // NEW: Validate "To Account" on blur
-  validateToAccount() {
-  const toId = this.transferForm.get('toAccountId')?.value;
-  const fromId = this.transferForm.get('fromAccountId')?.value;
-
-  if (!toId) {
-    this.toAccountValid = false;
-    this.transferForm.get('amount')?.disable();
-    return;
+    });
   }
 
-  if (toId === fromId) {
-    this.toAccountValid = false;
-    this.isError = true;
-    this.message = "Source and destination accounts must be different.";
+  // FIX 1: Explicitly patch the value so the readonly input sees it
+  onAccountSelect(accountId: any) {
+    const id = Number(accountId);
+    this.transferForm.patchValue({ fromAccountId: id }); // This ensures the readonly input updates
+    
+    this.transferForm.get('toAccountId')?.enable();
+    this.transferForm.get('toAccountId')?.setValue('');
     this.transferForm.get('amount')?.disable();
     this.transferForm.get('amount')?.setValue('');
-  } else {
-    // If they aren't the same, we assume it's valid for now 
-    // and let the final transfer call handle the existence check.
-    this.toAccountValid = true;
-    this.isError = false;
-    this.message = ""; 
-    this.transferForm.get('amount')?.enable();
-  }
-  this.cdr.detectChanges();
-}
-
-/*
-// Helper to avoid code duplication
-private handleValidRecipient(id: any) {
-  this.toAccountValid = true;
-  this.isError = false;
-  this.message = `Recipient Verified: ${id}`;
-  this.transferForm.get('amount')?.enable();
-  this.cdr.detectChanges();
-}
-  */
-
- onTransfer() {
-  // 1. Basic UI Guard
-  if (!this.toAccountValid) {
-    this.message = "Please enter a valid recipient account first.";
-    this.isError = true;
-    return;
+    
+    this.toAccountValid = false;
+    this.cdr.detectChanges();
   }
 
+  validateToAccount() {
+    const toControl = this.transferForm.get('toAccountId');
+    const fromId = this.transferForm.get('fromAccountId')?.value;
+    const toId = toControl?.value;
+
+    this.toAccountValid = false;
+    this.transferForm.get('amount')?.disable();
+
+    if (!toId) return;
+
+    if (toControl?.errors?.['pattern']) return;
+
+    if (Number(toId) === Number(fromId)) {
+      toControl?.setErrors({ sameAccount: true });
+    } else {
+      this.toAccountValid = true;
+      this.transferForm.get('amount')?.enable();
+    }
+  }
+
+onTransfer() {
   if (this.transferForm.invalid) return;
-
+  
   this.loading = true;
-  this.message = '';
-  this.isError = false;
-
   const { fromAccountId, toAccountId, amount } = this.transferForm.getRawValue();
 
   this.transferService.executeTransfer(fromAccountId, toAccountId, amount)
+    .pipe(
+      finalize(() => {
+        this.loading = false;
+        this.cdr.detectChanges();
+      })
+    )
     .subscribe({
       next: (res) => {
-        this.loading = false;
-        this.isError = false; // Reset error state on success
-        this.message = `Success! ${res.message || 'Transfer completed.'}`;
-
-        const currentFrom = fromAccountId; 
-        this.transferForm.reset(); 
-        this.toAccountValid = false;
-        this.transferForm.get('amount')?.disable();
-        this.loadUserAccounts(currentFrom); 
-        this.cdr.detectChanges();
+        this.showSnackbar(`Success! Transfer completed.`, 'success');
+        // Save the current sender ID to reload their balance after reset
+        const lastFrom = fromAccountId;
+        this.clearForm();
+        this.loadUserAccounts(lastFrom);
       },
       error: (err) => {
-        this.loading = false;
-        this.isError = true; // Set error state to true
-
-        // Extracting the message: 
-        // 1. err.error.message (Standard Spring Boot)
-        // 2. err.error (Plain string)
-        // 3. err.message (HTTP failure)
-        this.message = err.error?.message || err.error || err.message || 'An unexpected error occurred.';
+        let errorMsg = 'An unexpected error occurred.';
         
-        console.log("Setting UI message to:", this.message); // Debug check
-        this.cdr.detectChanges();
+        // Handle specific 404/Not Found logic
+        if (err.status === 404 || err.error?.message?.includes('not found')) {
+          errorMsg = 'Recipient account ID not found.';
+          
+          // --- THE FIX: Clear the form on error ---
+          //this.clearForm(); 
+        } else {
+          errorMsg = err.error?.message || err.error || 'Transfer failed.';
+        }
+
+        this.showSnackbar(errorMsg, 'error');
       }
     });
 }
+  showSnackbar(message: string, type: 'success' | 'error') {
+    this.snackBar.open(message, 'Close', {
+      duration: 5000,
+      panelClass: type === 'success' ? ['green-snackbar'] : ['red-snackbar'],
+      horizontalPosition: 'end',
+      verticalPosition: 'top'
+    });
+  }
 
   clearForm() {
-  this.transferForm.reset();
-  this.toAccountValid = false;
-  this.transferForm.get('amount')?.disable();
-  this.message = 'Form cleared.';
-  this.isError = false;
-  this.cdr.detectChanges();
-}
+    // 1. Reset UI validation states (removes red borders)
+    if (this.formGroupDirective) {
+      this.formGroupDirective.resetForm();
+    }
 
+    // 2. Reset data values
+    this.transferForm.reset();
+
+    // 3. Re-enforce the disabled hierarchy
+    // Only fromAccountId select should be enabled initially
+    this.transferForm.get('toAccountId')?.disable();
+    this.transferForm.get('amount')?.disable();
+    
+    this.toAccountValid = false;
+    this.cdr.detectChanges();
+  }
 }

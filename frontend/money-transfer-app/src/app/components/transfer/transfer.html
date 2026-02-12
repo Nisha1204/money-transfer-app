@@ -1,47 +1,53 @@
-<div class="card">
-  <h2>Money Transfer</h2>
+<mat-card class="transfer-card">
+  <mat-card-header>
+    <mat-card-title>Money Transfer</mat-card-title>
+  </mat-card-header>
 
-  <form [formGroup]="transferForm" (ngSubmit)="onTransfer()">
-    
-    <label>Select Source Account</label>
-    <select 
-      formControlName="fromAccountId" 
-      (change)="onAccountSelect($any($event.target).value)">
-      <option value="" disabled>-- Select Account --</option>
-      <option *ngFor="let acc of accounts" [value]="acc.id">
-        Account ID: {{acc.id}} (Balance: {{acc.balance | currency}})
-      </option>
-    </select>
+  <mat-card-content>
+    <form [formGroup]="transferForm" #transferFormDirective="ngForm" (ngSubmit)="onTransfer()">
+      
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Select Source Account</mat-label>
+        <mat-select formControlName="fromAccountId" (selectionChange)="onAccountSelect($event.value)">
+          <mat-option *ngFor="let acc of accounts" [value]="acc.id">
+            Account {{acc.id}} ({{acc.balance | currency}})
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
 
-    <hr/>
-    
-    <div class="group">
-      <label>From Account ID (Confirmed)</label>
-      <input type="number" formControlName="fromAccountId" readonly class="readonly-input">
-    </div>
+      <div class="row">
+        <mat-form-field appearance="outline" class="flex-item">
+          <mat-label>From Account ID</mat-label>
+          <input matInput formControlName="fromAccountId" readonly>
+        </mat-form-field>
 
-    <div class="group">
-      <label>To Account ID</label>
-      <input type="number" formControlName="toAccountId" (blur)="validateToAccount()">
-    </div>
+        <mat-form-field appearance="outline" class="flex-item">
+          <mat-label>To Account ID</mat-label>
+          <input matInput type="text" formControlName="toAccountId" (input)="validateToAccount()">
+          <mat-error *ngIf="transferForm.get('toAccountId')?.hasError('pattern')">Numbers only.</mat-error>
+          <mat-error *ngIf="transferForm.get('toAccountId')?.hasError('sameAccount')">Cannot transfer to same account.</mat-error>
+        </mat-form-field>
+      </div>
 
-    <div class="group">
-      <label>Amount</label>
-      <input type="number" formControlName="amount" placeholder="0.00">
-    </div>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Amount</mat-label>
+        <input matInput type="number" formControlName="amount">
+        <span matPrefix>$&nbsp;</span>
+        <mat-error *ngIf="transferForm.get('amount')?.hasError('min')">
+          Amount must be at least $0.01.
+        </mat-error>
+      </mat-form-field>
 
-    <button type="submit" [disabled]="transferForm.invalid || loading || !toAccountValid">
-      {{ loading ? 'Processing...' : 'Send Money' }}
-    </button>
-  </form>
+      <div class="actions">
+        <button mat-raised-button color="primary" type="submit" 
+                [disabled]="transferForm.invalid || loading">
+          {{ loading ? 'Processing...' : 'Send Money' }}
+        </button>
 
-  <p *ngIf="message" [ngClass]="isError ? 'error-text' : 'success-text'" style="margin-top: 10px; font-weight: bold;">
-    {{ message }}
-  </p>
-</div>
-
-<div class="button-group" style="display: flex; gap: 10px; margin-top: 15px;">
-  <button type="button" class="btn-secondary" (click)="clearForm()" [disabled]="loading">
-    Clear Form
-  </button>
-</div>
+        <button mat-button type="button" (click)="clearForm()" [disabled]="loading">
+          Clear Form
+        </button>
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>

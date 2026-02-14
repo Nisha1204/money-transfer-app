@@ -6,6 +6,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { AuthService } from '../../services/auth.service'; // Use the service!
 import { CommonModule } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 @Component({
   selector: 'app-register',
@@ -16,7 +18,9 @@ import { CommonModule } from '@angular/common';
     MatCardModule,
     MatInputModule,
     MatButtonModule,
-    CommonModule
+    CommonModule,
+    MatIconModule,
+    MatProgressBarModule
   ],
   templateUrl: './register.html',
   styleUrl: './register.css',

@@ -13,9 +13,16 @@ export class TransferService {
 
   constructor(private http: HttpClient) {}
 
+  /*
   getAccountData(id: number): Observable<any> {
     return this.http.get<any>(`http://localhost:8080/api/v1/accounts/${id}`);
   }
+    */
+
+// Change this method to use the "my-accounts" endpoint
+getMyAccounts(): Observable<any[]> {
+  return this.http.get<any[]>(`http://localhost:8080/api/v1/accounts/my-accounts`);
+}
 
 
   executeTransfer(fromAccountId: number, toAccountId: number, amount: number): Observable<any> {

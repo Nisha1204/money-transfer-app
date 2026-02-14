@@ -1,53 +1,91 @@
-<mat-card class="transfer-card">
-  <mat-card-header>
-    <mat-card-title>Money Transfer</mat-card-title>
-  </mat-card-header>
 
-  <mat-card-content>
-    <form [formGroup]="transferForm" #transferFormDirective="ngForm" (ngSubmit)="onTransfer()">
+
+<mat-toolbar class="header-toolbar">
+  <button mat-icon-button (click)="goBack()">
+    <mat-icon>arrow_back</mat-icon>
+  </button>
+  <span>Transfer Funds</span>
+</mat-toolbar>
+
+<div class="transfer-wrapper">
+  <mat-card class="transfer-card glass-effect">
+    <mat-card-header>
+      <div class="header-icon">
+        <mat-icon>send</mat-icon>
+      </div>
+      <mat-card-title>Transfer Funds</mat-card-title>
+      <mat-card-subtitle>Move money securely between accounts</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="transferForm" #transferFormDirective="ngForm" (ngSubmit)="onTransfer()" class="transfer-form">
+        
+        
+        <div class="form-section">
+          <label class="section-label">1. Select Source Account</label>
+          
+          <mat-form-field appearance="outline" class="full-width">
+  <mat-label>Select Source Account</mat-label>
+  <mat-select formControlName="fromAccountId" (selectionChange)="onAccountSelect($event.value)">
+    
+    <mat-select-trigger>
+      <div class="selected-account-display" *ngIf="transferForm.get('fromAccountId')?.value">
+        <span class="selected-id">Account #{{transferForm.get('fromAccountId')?.value}}</span>
+        </div>
+    </mat-select-trigger>
+
+    <mat-option *ngFor="let acc of accounts" [value]="acc.id">
+      <div class="account-option-container">
+        <span class="acc-id-label">Account #{{acc.id}}</span>
+        <span class="acc-balance-subtext">{{acc.balance | currency:'INR'}}</span>
+      </div>
+    </mat-option>
+  </mat-select>
+  <mat-icon matPrefix>account_balance</mat-icon>
+</mat-form-field>
+
+        </div>
       
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Select Source Account</mat-label>
-        <mat-select formControlName="fromAccountId" (selectionChange)="onAccountSelect($event.value)">
-          <mat-option *ngFor="let acc of accounts" [value]="acc.id">
-            Account {{acc.id}} ({{acc.balance | currency}})
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
 
-      <div class="row">
-        <mat-form-field appearance="outline" class="flex-item">
-          <mat-label>From Account ID</mat-label>
-          <input matInput formControlName="fromAccountId" readonly>
-        </mat-form-field>
+        <div class="form-section" [class.disabled-section]="!transferForm.get('fromAccountId')?.value">
+          <label class="section-label">2. Recipient Information</label>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Recipient Account ID</mat-label>
+            <input matInput type="text" formControlName="toAccountId" (input)="validateToAccount()" placeholder="e.g. 10293">
+            <mat-icon matSuffix>person_search</mat-icon>
+            <mat-error *ngIf="transferForm.get('toAccountId')?.hasError('pattern')">Numbers only.</mat-error>
+            <mat-error *ngIf="transferForm.get('toAccountId')?.hasError('sameAccount')">Cannot transfer to yourself.</mat-error>
+          </mat-form-field>
+        </div>
 
-        <mat-form-field appearance="outline" class="flex-item">
-          <mat-label>To Account ID</mat-label>
-          <input matInput type="text" formControlName="toAccountId" (input)="validateToAccount()">
-          <mat-error *ngIf="transferForm.get('toAccountId')?.hasError('pattern')">Numbers only.</mat-error>
-          <mat-error *ngIf="transferForm.get('toAccountId')?.hasError('sameAccount')">Cannot transfer to same account.</mat-error>
-        </mat-form-field>
-      </div>
+        <div class="form-section" [class.disabled-section]="!toAccountValid">
+          <label class="section-label">3. Transaction Amount</label>
+          <mat-form-field appearance="outline" class="full-width amount-field">
+            <mat-label>Amount to Send</mat-label>
+            <input matInput type="number" formControlName="amount" placeholder="0.00">
+            <span matPrefix class="currency-prefix">₹&nbsp;</span>
+            <mat-error *ngIf="transferForm.get('amount')?.hasError('min')">Minimum amount is ₹0.01</mat-error>
+          </mat-form-field>
+        </div>
 
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Amount</mat-label>
-        <input matInput type="number" formControlName="amount">
-        <span matPrefix>$&nbsp;</span>
-        <mat-error *ngIf="transferForm.get('amount')?.hasError('min')">
-          Amount must be at least $0.01.
-        </mat-error>
-      </mat-form-field>
+        <div class="transfer-actions">
+          <button mat-flat-button color="primary" class="submit-btn" type="submit" 
+                  [disabled]="transferForm.invalid || loading">
+            <mat-icon *ngIf="!loading">verified_user</mat-icon>
+            <mat-spinner diameter="20" *ngIf="loading"></mat-spinner>
+            {{ loading ? 'Processing...' : 'Confirm Transfer' }}
+          </button>
 
-      <div class="actions">
-        <button mat-raised-button color="primary" type="submit" 
-                [disabled]="transferForm.invalid || loading">
-          {{ loading ? 'Processing...' : 'Send Money' }}
-        </button>
+          <button mat-stroked-button type="button" (click)="clearForm()" [disabled]="loading">
+            Reset
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
 
-        <button mat-button type="button" (click)="clearForm()" [disabled]="loading">
-          Clear Form
-        </button>
-      </div>
-    </form>
-  </mat-card-content>
-</mat-card>
+  <footer class="security-footer">
+    <mat-icon>shield</mat-icon>
+    <span>PCI-DSS Compliant Secure Transfer</span>
+  </footer>
+</div>

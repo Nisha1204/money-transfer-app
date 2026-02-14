@@ -1,36 +1,42 @@
-/* Global Styles */
-html, body {
-  height: 100%;
+
+
+/* Import the Material Indigo-Pink prebuilt theme */
+@import "@angular/material/prebuilt-themes/indigo-pink.css";
+
+/* Add some global resets to ensure full height */
+html, body { 
+  height: 100%; 
+  margin: 0; 
+  padding: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif; 
 }
 
-body {
-  margin: 0;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
-  background-color: #f5f5f5;
+/* src/styles.css */
+
+:root {
+  /* Define your Green Palette */
+  --primary-green: #059669; /* Emerald 600 */
+  --primary-green-hover: #047857; /* Emerald 700 */
+  --primary-green-light: #ecfdf5; /* Emerald 50 */
 }
 
-* {
-  box-sizing: border-box;
+/* Override Angular Material Primary Buttons and Elements */
+.mat-flat-button.mat-primary, 
+.mat-raised-button.mat-primary, 
+.mat-fab.mat-primary, 
+.mat-mini-fab.mat-primary {
+  background-color: var(--primary-green) !important;
 }
 
-/* Material Card Enhancements */
-.mat-mdc-card {
-  margin: 16px;
+/* Override focused form field borders and labels */
+.mat-mdc-form-field.mat-focused .mat-mdc-select-arrow,
+.mat-mdc-form-field.mat-focused .mat-mdc-floating-label {
+  color: var(--primary-green) !important;
 }
 
-/* Utility Classes */
-.text-center {
-  text-align: center;
-}
-
-.mt-2 {
-  margin-top: 16px;
-}
-
-.mb-2 {
-  margin-bottom: 16px;
-}
-
-.full-width {
-  width: 100%;
+.mat-mdc-form-field.mat-focused .mdc-notched-outline__leading,
+.mat-mdc-form-field.mat-focused .mdc-notched-outline__notch,
+.mat-mdc-form-field.mat-focused .mdc-notched-outline__trailing {
+  border-color: var(--primary-green) !important;
+  border-width: 2px !important;
 }

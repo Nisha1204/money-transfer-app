@@ -6,6 +6,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { AuthService } from '../../services/auth.service'; // Check this path
 import { CommonModule } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-login',
@@ -16,9 +17,11 @@ import { CommonModule } from '@angular/common';
     MatCardModule,
     MatInputModule,
     MatButtonModule,
+    MatIconModule,
     CommonModule
   ],
-  templateUrl: './login.html'
+  templateUrl: './login.html',
+  styleUrl: './login.css'
 })
 export class Login {
 

@@ -1,4 +1,4 @@
-<mat-toolbar class="hero">
+<!-- <mat-toolbar class="hero">
   <span class="toolbar-title">
     <mat-icon>account_balance</mat-icon>
     MONEY TRANSFER APP
@@ -110,5 +110,90 @@
     <mat-icon>info</mat-icon>
     <p>You don't have any accounts linked yet.</p>
     <button mat-raised-button color="primary">Open New Account</button>
+  </div>
+</div> -->
+
+<mat-toolbar class="main-toolbar">
+  <div class="brand">
+    <mat-icon class="logo-icon">account_balance</mat-icon>
+    <span>FINTECH<strong>CORE</strong></span>
+  </div>
+  <span class="spacer"></span>
+  <button mat-icon-button (click)="refreshData()" matTooltip="Refresh Data">
+    <mat-icon>refresh</mat-icon>
+  </button>
+  <button mat-flat-button class="logout-btn" (click)="logout()">
+    <mat-icon>logout</mat-icon>
+    Logout
+  </button>
+</mat-toolbar>
+
+<div class="dashboard-container">
+  <div class="center-state" *ngIf="loading">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Loading your financial overview...</p>
+  </div>
+
+  <div class="dashboard-content" *ngIf="!loading && !error && accounts.length > 0">
+    
+    <header class="welcome-section">
+      <h1>Hello, {{ accounts[0].holderName }}</h1>
+      <p>Here is what's happening with your {{ accounts.length }} account(s) today.</p>
+    </header>
+
+    <mat-tab-group 
+      (selectedIndexChange)="onTabChange($event)" 
+      class="custom-tabs"
+      animationDuration="0ms">
+      <mat-tab *ngFor="let acc of accounts">
+        <ng-template mat-tab-label>
+          <div class="tab-label">
+            <span class="acc-id">#{{ acc.id }}</span>
+            <span class="acc-type">Primary Account</span>
+          </div>
+        </ng-template>
+      </mat-tab>
+    </mat-tab-group>
+
+    <div class="account-view" *ngIf="selectedAccount">
+      <div class="main-stats-grid">
+        
+        <mat-card class="balance-hero">
+          <mat-card-content>
+            <div class="label">Available Balance</div>
+            <div class="amount">₹{{ selectedAccount.balance | number:'1.2-2' }}</div>
+            <div class="status-indicator">
+              <span class="dot" [ngClass]="selectedAccount.status.toLowerCase()"></span>
+              {{ selectedAccount.status }} Account
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <div class="action-grid">
+          <div class="action-item" (click)="doTransfer(selectedAccount.id)">
+            <div class="icon-box transfer"><mat-icon>send</mat-icon></div>
+            <span>Transfer</span>
+          </div>
+          <div class="action-item" (click)="viewTransactions(selectedAccount.id)">
+            <div class="icon-box history"><mat-icon>history</mat-icon></div>
+            <span>History</span>
+          </div>
+          <div class="action-item" (click)="viewBalance(selectedAccount.id)">
+            <div class="icon-box balance"><mat-icon>account_balance_wallet</mat-icon></div>
+            <span>Balance</span>
+          </div>
+          <div class="action-item" (click)="viewAccountDetails(selectedAccount.id)">
+            <div class="icon-box details"><mat-icon>manage_accounts</mat-icon></div>
+            <span>Settings</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="center-state" *ngIf="!loading && !error && accounts.length === 0">
+    <mat-icon class="huge-icon">no_accounts</mat-icon>
+    <h3>No Accounts Found</h3>
+    <button mat-flat-button color="primary">Open New Account</button>
   </div>
 </div>

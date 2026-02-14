@@ -11,11 +11,27 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatSnackBar } from '@angular/material/snack-bar'; // Import SnackBar
 import { finalize } from 'rxjs'; // 1. Add this import
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { Location } from '@angular/common'; // Import for back button
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-transfer',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatButtonModule, MatIconModule],
+  imports: [CommonModule, 
+    ReactiveFormsModule, 
+    MatCardModule, 
+    MatFormFieldModule, 
+    MatToolbarModule, 
+    MatInputModule, 
+    MatSelectModule, 
+    MatButtonModule, 
+    MatIconModule,
+    MatSnackBarModule,
+    MatProgressSpinnerModule
+  ],
   templateUrl: './transfer.html',
   styleUrls: ['./transfer.css']
 })
@@ -32,6 +48,8 @@ export class TransferComponent implements OnInit {
     private fb: FormBuilder, 
     private transferService: TransferService, 
     private cdr: ChangeDetectorRef,
+    private authService: AuthService, // Inject your Auth Service
+    private location: Location,
     private snackBar: MatSnackBar // Inject SnackBar
   ) {
     this.transferForm = this.fb.group({
@@ -41,17 +59,33 @@ export class TransferComponent implements OnInit {
     });
   }
 
-  ngOnInit() {
-    this.loadUserAccounts(1);
+// transfer.ts
+
+ngOnInit() {
+  this.loadUserAccounts(); // No ID needed here anymore
+}
+
+loadUserAccounts() {
+  this.loading = true;
+  this.transferService.getMyAccounts().subscribe({
+    next: (data) => {
+      // Your API returns a List<AccountResponse>, so 'data' is the array
+      this.accounts = data; 
+      this.loading = false;
+      this.cdr.detectChanges();
+    },
+    error: (err) => {
+      console.error('Error fetching accounts:', err);
+      this.loading = false;
+      this.showSnackbar('Could not load your accounts.', 'error');
+    }
+  });
+}
+
+  goBack() {
+    this.location.back();
   }
 
-  loadUserAccounts(accountId: number) {
-    this.transferService.getAccountData(accountId).subscribe({
-      next: (data) => {
-        if (data?.owner?.accounts) this.accounts = data.owner.accounts;
-      }
-    });
-  }
 
   // FIX 1: Explicitly patch the value so the readonly input sees it
   onAccountSelect(accountId: any) {
@@ -106,7 +140,7 @@ onTransfer() {
         // Save the current sender ID to reload their balance after reset
         const lastFrom = fromAccountId;
         this.clearForm();
-        this.loadUserAccounts(lastFrom);
+        this.loadUserAccounts();
       },
       error: (err) => {
         let errorMsg = 'An unexpected error occurred.';

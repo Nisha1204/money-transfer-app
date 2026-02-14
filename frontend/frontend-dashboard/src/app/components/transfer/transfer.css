@@ -1,128 +1,240 @@
-.card {
-  max-width: 400px;
-  margin: 40px auto;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-  font-family: Arial, sans-serif;
-}
-.group { margin-bottom: 15px; }
-label { display: block; margin-bottom: 5px; font-weight: bold; }
-input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-button { width: 100%; padding: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
-button:disabled { background: #ccc; }
-.success { color: green; margin-top: 10px; }
-/* In transfer.css */
-.error {
-  color: #721c24;
-  background-color: #f8d7da;
-  padding: 0.75rem 1.25rem;
-  border: 1px solid #f5c6cb;
-  border-radius: 0.25rem;
-  display: block !important; /* Force visibility for testing */
-}
 
-.account-selector {
-  background: #f4f7f6;
-  padding: 15px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-}
-
-.account-selector select {
-  width: 100%;
-  padding: 8px;
-  margin-top: 5px;
-}
-
-.readonly-input {
-  background-color: #e9ecef;
-  cursor: not-allowed;
-}
-
-hr {
-  border: 0;
-  border-top: 1px solid #eee;
-  margin: 20px 0;
-}
-
-/* transfer.css */
-.error-text {
-  color: #d32f2f; /* Red */
-  background-color: #fdecea;
-  padding: 8px;
-  border-radius: 4px;
-}
-
-.success-text {
-  color: #2e7d32; /* Green */
-  background-color: #edf7ed;
-  padding: 8px;
-  border-radius: 4px;
+.transfer-wrapper {
+  padding: 40px 20px;
+  max-width: 550px;
+  margin: 0 auto;
 }
 
 .transfer-card {
-  max-width: 500px;
-  margin: 2rem auto;
-  padding: 16px;
+  border-radius: 20px !important;
+  padding: 24px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05) !important;
 }
 
-.transfer-form {
+.header-icon {
+  background: #ecfdf5;
+  color: #059669;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 20px;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
 }
 
-.full-width {
+mat-card-title {
+  font-weight: 700 !important;
+  font-size: 1.4rem !important;
+  color: #0f172a;
+}
+
+.form-section {
+  margin-bottom: 24px;
+  transition: opacity 0.3s ease;
+}
+
+.disabled-section {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.section-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #64748b;
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+
+.full-width { width: 100%; }
+
+/* Custom Option Slot */
+.option-slot {
+  display: flex;
+  justify-content: space-between;
   width: 100%;
 }
+.id-tag { font-weight: 600; }
+.balance-tag { color: #059669; font-size: 0.85rem; }
 
-.row {
-  display: flex;
-  gap: 16px;
-  
-  .flex-item {
-    flex: 1;
-  }
+.currency-prefix {
+  font-weight: 700;
+  color: #1e293b;
 }
 
-.actions {
+.amount-field input {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.transfer-actions {
   display: flex;
-  flex-direction: row-reverse;
-  justify-content: flex-start;
+  flex-direction: column;
   gap: 12px;
   margin-top: 16px;
 }
 
-.message-container {
-  padding: 12px;
-  border-radius: 4px;
+.submit-btn {
+  height: 54px !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  border-radius: 12px !important;
+  background: #059669 !important;
+}
+
+.security-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 32px;
+  color: #94a3b8;
+  font-size: 0.8rem;
+}
+
+/* Animations */
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+.loading-spinner { margin-right: 8px; }
+
+.solid-select .mat-mdc-text-field-wrapper {
+  background-color: white !important; /* Fixes odd transparency */
+}
+
+.header-toolbar {
+  background: white;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 20px;
+}
+
+/* Fix the transparent dropdown look */
+.full-width.mat-form-field {
+  background-color: white !important;
+  border-radius: 8px;
+}
+
+/* Ensure the select trigger has high contrast */
+::ng-deep .mat-mdc-select-value {
+  color: #1e293b !important;
   font-weight: 500;
-  background-color: #e8f5e9;
-  color: #2e7d32;
 }
 
-/* Add these to your global styles.css */
-.green-snackbar {
-  background: #4caf50 !important;
-  color: white !important;
+/* Add some padding to the transfer card container */
+.transfer-container {
+  padding-top: 20px;
+  background-color: #f8fafc;
+  min-height: 100vh;
 }
 
-.red-snackbar {
-  background: #f44336 !important;
-  color: white !important;
+/* Fix the transparent input box */
+::ng-deep .mat-mdc-text-field-wrapper {
+  background-color: white !important;
+  border-radius: 8px !important;
 }
 
-/* Prevent interaction with the readonly input */
-input[readonly] {
-  pointer-events: none; /* Disables all mouse clicks/interactions */
-  cursor: not-allowed;  /* Shows the "stop" sign cursor */
-  user-select: none;    /* Prevents selecting the text */
+/* Ensure the 'outline' version has a solid background inside the notch */
+::ng-deep .mat-mdc-form-field-focus-overlay {
+  background-color: white !important;
+  opacity: 1 !important;
 }
 
-/* Optional: Make the background look more 'locked' */
-.locked-field {
-  opacity: 0.8;
-  background-color: #f5f5f5;
+/* Fix the transparency of the dropdown list itself */
+::ng-deep .mat-mdc-select-panel {
+  background-color: white !important;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1) !important;
+  border: 1px solid #e2e8f0 !important;
+  padding: 8px 0 !important;
 }
+
+/* Polish the option layout within the dropdown */
+.option-slot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 4px 0;
+}
+
+.id-tag {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.balance-tag {
+  color: #059669;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+/* Container inside the dropdown option */
+.account-option-container {
+  display: flex;
+  flex-direction: column; /* This stacks the items vertically */
+  line-height: 1.4;       /* Adds breathing room between lines */
+  padding: 8px 0;         /* Vertical padding for each option */
+}
+
+/* Style for the Account ID */
+.acc-id-label {
+  font-weight: 600;
+  color: #1e293b;
+  font-size: 0.95rem;
+}
+
+/* Style for the Balance below the ID */
+.acc-balance-subtext {
+  color: #059669;         /* Banking Green */
+  font-weight: 500;
+  font-size: 0.85rem;     /* Slightly smaller for hierarchy */
+  letter-spacing: 0.3px;
+}
+
+/* Increase the height of the select options to accommodate two lines */
+::ng-deep .mat-mdc-option {
+  height: 60px !important;
+  line-height: normal !important;
+}
+
+/* Fix for the transparent select look we fixed earlier */
+::ng-deep .mat-mdc-text-field-wrapper {
+  background-color: white !important;
+}
+
+/* Fix the selected text display */
+.selected-account-display {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-top: 4px;
+}
+
+.selected-id {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+/* Ensure the main select box has enough height to not cut off text */
+::ng-deep .mat-mdc-select-trigger {
+  height: 24px !important;
+  display: flex;
+  align-items: center;
+}
+
+/* Keep your existing dropdown fixes */
+.account-option-container {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+  padding: 6px 0;
+}
+
+.acc-id-label { font-weight: 600; }
+.acc-balance-subtext { color: #059669; font-size: 0.8rem; }

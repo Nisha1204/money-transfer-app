@@ -1,4 +1,4 @@
-<mat-toolbar class="header-actions">
+<!-- <mat-toolbar class="header-actions">
     <button mat-raised-button (click)="goBack()">
       <mat-icon>arrow_back</mat-icon>
       Back to Dashboard
@@ -7,13 +7,11 @@
 
 <div class="balance-container">
 
-  <!-- Loading -->
   <div class="loading-container" *ngIf="loading">
     <mat-spinner></mat-spinner>
     <p>Loading balance...</p>
   </div>
 
-  <!-- Error -->
   <mat-card class="error-card" *ngIf="error && !loading">
     <mat-card-content>
       <mat-icon color="warn">error</mat-icon>
@@ -24,9 +22,7 @@
     </mat-card-content>
   </mat-card>
 
-  <!-- Balance Display -->
   <div class="balance-content" *ngIf="!loading && !error">
-    <!-- Main Balance Card -->
     <mat-card class="balance-main-card">
       <mat-card-content>
         <div class="balance-display">
@@ -42,7 +38,6 @@
       </mat-card-content>
     </mat-card>
 
-    <!-- Account Summary Card -->
     <mat-card class="summary-card" *ngIf="accountData">
       <mat-card-header>
         <mat-card-title>Account Summary</mat-card-title>
@@ -85,7 +80,6 @@
       </mat-card-content>
     </mat-card>
 
-    <!-- Quick Actions -->
     <div class="quick-actions">
       <button mat-raised-button color="primary" (click)="loadBalance()">
         <mat-icon>refresh</mat-icon>
@@ -101,7 +95,6 @@
       </button>
     </div>
 
-    <!-- Balance Info Card
     <mat-card class="info-card">
       <mat-card-content>
         <div class="info-content">
@@ -112,6 +105,85 @@
           </div>
         </div>
       </mat-card-content>
-    </mat-card> -->
+    </mat-card> 
+  </div>
+</div> -->
+
+<mat-toolbar class="header-toolbar">
+  <button mat-icon-button (click)="goBack()" matTooltip="Back to Dashboard">
+    <mat-icon>arrow_back</mat-icon>
+  </button>
+  <span>Balance Inquiry</span>
+  <span class="spacer"></span>
+</mat-toolbar>
+
+<div class="balance-container">
+  <div class="center-state" *ngIf="loading">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Syncing with ledger...</p>
+  </div>
+
+  <mat-card class="error-card glass" *ngIf="error && !loading">
+    <mat-card-content>
+      <mat-icon color="warn">cloud_off</mat-icon>
+      <h3>System Unavailable</h3>
+      <p>{{ error }}</p>
+      <button mat-flat-button color="primary" (click)="loadBalance()">Retry Connection</button>
+    </mat-card-content>
+  </mat-card>
+
+  <div class="balance-content" *ngIf="!loading && !error">
+    <mat-card class="wallet-hero">
+      <mat-card-content>
+        <div class="wallet-header">
+          <mat-icon>account_balance_wallet</mat-icon>
+          <span>Available Funds</span>
+        </div>
+        
+        <div class="amount-display">
+          <span class="currency">₹</span>
+          <span class="integer">{{ balance }}</span>
+          <span class="decimal">.{{ balance }}</span>
+        </div>
+
+        <div class="account-pill" *ngIf="accountData">
+          <mat-icon>fingerprint</mat-icon>
+          Account #{{ accountId }} • {{ accountData.holderName }}
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <div class="info-strip" *ngIf="accountData">
+      <div class="strip-item">
+        <label>Status</label>
+        <span class="status-badge" [attr.data-status]="accountData.status">
+          {{ accountData.status }}
+        </span>
+      </div>
+      <div class="strip-item">
+        <label>Verification</label>
+        <span class="val">Verified Account</span>
+      </div>
+      <div class="strip-item">
+        <label>Last Updated</label>
+        <span class="val">{{ accountData.updatedAt | date:'shortTime' }}</span>
+      </div>
+    </div>
+
+    <div class="action-grid">
+      <button mat-flat-button color="primary" class="big-action" (click)="loadBalance()">
+        <mat-icon>sync</mat-icon>
+        Refresh Balance
+      </button>
+      <button mat-stroked-button class="big-action" (click)="viewFullDetails()">
+        <mat-icon>visibility</mat-icon>
+        Statement Details
+      </button>
+    </div>
+
+    <footer class="disclaimer">
+      <mat-icon>security</mat-icon>
+      Your connection to the banking server is encrypted and secure.
+    </footer>
   </div>
 </div>

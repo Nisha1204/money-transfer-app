@@ -1,4 +1,4 @@
-<div style="display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f5f5f5;">
+<!-- <div style="display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f5f5f5;">
   <mat-card style="width: 100%; max-width: 400px; padding: 24px;">
 
     <div style="text-align: center; margin-bottom: 24px;">
@@ -44,5 +44,55 @@
       </a>
     </div>
 
+  </mat-card>
+</div> -->
+
+<div class="register-container">
+  <mat-card class="register-card" appearance="raised">
+    <header class="register-header">
+      <div class="logo-icon">
+        <mat-icon color="primary">person_add</mat-icon>
+      </div>
+      <h2>Create Account</h2>
+      <p class="subtitle">Join our secure banking platform</p>
+    </header>
+
+    <mat-card-content>
+      <form (ngSubmit)="register()" #regForm="ngForm" *ngIf="!message">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Username</mat-label>
+          <input matInput [(ngModel)]="username" name="username" required placeholder="Choose a unique username">
+          <mat-icon matSuffix>account_circle</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Password</mat-label>
+          <input matInput type="password" [(ngModel)]="password" name="password" required placeholder="Minimum 8 characters">
+          <mat-icon matSuffix>lock_open</mat-icon>
+        </mat-form-field>
+
+        <div *ngIf="errorMessage" class="feedback-container error">
+          <mat-icon>error_outline</mat-icon>
+          <span>{{ errorMessage }}</span>
+        </div>
+
+        <button mat-flat-button color="primary" class="register-button" type="submit">
+          GET STARTED
+        </button>
+      </form>
+
+      <div *ngIf="message" class="success-state">
+        <mat-icon class="check-icon">check_circle</mat-icon>
+        <h3>Success!</h3>
+        <p>{{ message }}</p>
+        <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+        <span class="redirect-text">Redirecting to login...</span>
+      </div>
+    </mat-card-content>
+
+    <mat-card-footer class="register-footer" *ngIf="!message">
+      <span class="muted-text">Already have an account?</span>
+      <a routerLink="/login" class="login-link">Sign In</a>
+    </mat-card-footer>
   </mat-card>
 </div>

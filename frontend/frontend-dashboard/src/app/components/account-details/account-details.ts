@@ -70,6 +70,7 @@ export class AccountDetailsComponent implements OnInit {
     this.router.navigate(['/dashboard']);
   }
 
+  /*
   getStatusColor(status: string): string {
     switch (status) {
       case 'ACTIVE':
@@ -78,6 +79,21 @@ export class AccountDetailsComponent implements OnInit {
         return 'warn';
       case 'CLOSED':
         return 'accent';
+      default:
+        return '';
+    }
+  }
+    */
+
+  // Updated slightly for the new palette
+  getStatusColor(status: string): string {
+    switch (status) {
+      case 'ACTIVE':
+        return 'primary'; // Will map to Emerald/Green
+      case 'LOCKED':
+        return 'warn';    // Will map to Amber/Orange
+      case 'CLOSED':
+        return 'accent';  // Will map to Red/Grey
       default:
         return '';
     }

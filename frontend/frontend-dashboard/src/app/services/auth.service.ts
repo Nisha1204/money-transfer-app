@@ -14,22 +14,32 @@ export class AuthService {
 
   constructor(private http: HttpClient, private router: Router) {}
 
-  // 1. LOGIN
-  // Matches @PostMapping("/api/auth/login")
-  login(username: string, password: string): Observable<any> {
-    const loginUrl = `${this.baseUrl}/api/auth/login`;
-    
-    // Send JSON body to Backend
-    return this.http.post<any>(loginUrl, { username, password }).pipe(
-      tap(response => {
-        // If the backend returns 200 OK, we assume success.
-        // We create a "Basic Auth" token to store in the browser.
-        // (Even if your backend doesn't force security yet, this is good practice)
-        const token = btoa(`${username}:${password}`);
-        this.setToken(token);
-      })
-    );
-  }
+// auth.service.ts
+
+login(username: string, password: string): Observable<any> {
+  const loginUrl = `${this.baseUrl}/api/auth/login`;
+  
+  return this.http.post<any>(loginUrl, { username, password }).pipe(
+    tap(response => {
+      // 1. Save the Auth Token
+      const token = btoa(`${username}:${password}`);
+      this.setToken(token);
+
+      // 2. SAVE THE USER DATA (The missing link!)
+      // Assuming your backend returns { id: number, username: string, ... }
+      if (response) {
+        localStorage.setItem('user_data', JSON.stringify(response));
+      }
+    })
+  );
+}
+
+// Ensure your logout clears this as well
+logout(): void {
+  localStorage.removeItem(this.TOKEN_KEY);
+  localStorage.removeItem('user_data'); // Clear user info
+  this.router.navigate(['/login']); 
+}
 
   // 2. REGISTER
   // Matches @PostMapping("/api/auth/register")
@@ -43,16 +53,7 @@ export class AuthService {
     });
   }
 
-  // 3. LOGOUT
-  // auth.service.ts
 
-logout(): void {
-  // 1. Remove the "Key" so future requests fail
-  localStorage.removeItem(this.TOKEN_KEY); 
-  
-  // 2. Redirect the user to the Login page visually
-  this.router.navigate(['/login']); 
-}
   // 4. CHECK AUTH STATUS
   isAuthenticated(): boolean {
     return !!this.getToken();
@@ -65,4 +66,27 @@ logout(): void {
   private setToken(token: string): void {
     localStorage.setItem(this.TOKEN_KEY, token);
   }
+
+  // auth.service.ts
+
+getCurrentUser(): number | null {
+  const token = localStorage.getItem(this.TOKEN_KEY);
+  if (!token) return null;
+
+  const userData = localStorage.getItem('user_data');
+  
+  // Debugging: Check what is actually in storage
+  console.log('Stored User Data:', userData);
+
+  if (!userData) return null;
+
+  try {
+    const user = JSON.parse(userData);
+    return user.id || null; 
+  } catch (e) {
+    console.error('Error parsing user data', e);
+    return null;
+  }
+}
+
 }

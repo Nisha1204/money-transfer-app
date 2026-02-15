@@ -47,7 +47,14 @@ export class Login {
 
     this.authService.login(this.username, this.password).subscribe({
       next: (response) => {
-        this.router.navigate(['/dashboard']);
+        // Check the role from the updated AuthService/LocalStorage
+        const role = this.authService.getUserRole();
+        
+        if (role === 'ADMIN') {
+          this.router.navigate(['/admin-dashboard']);
+        } else {
+          this.router.navigate(['/dashboard']);
+        }
       },
       error: (err) => {
         console.error('Login failed:', err);

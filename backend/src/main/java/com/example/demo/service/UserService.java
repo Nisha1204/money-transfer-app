@@ -42,4 +42,8 @@ public class UserService {
 
         return false; // User not found
     }
+
+    public Optional<User> getUserByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
 }

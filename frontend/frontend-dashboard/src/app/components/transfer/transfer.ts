@@ -65,6 +65,10 @@ ngOnInit() {
   this.loadUserAccounts(); // No ID needed here anymore
 }
 
+get visibleAccounts() {
+    return this.accounts.filter(acc => acc.status !== 'CLOSED');
+  }
+
 loadUserAccounts() {
   this.loading = true;
   this.transferService.getMyAccounts().subscribe({

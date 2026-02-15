@@ -31,13 +31,16 @@
     <mat-select-trigger>
       <div class="selected-account-display" *ngIf="transferForm.get('fromAccountId')?.value">
         <span class="selected-id">Account #{{transferForm.get('fromAccountId')?.value}}</span>
-        </div>
+      </div>
     </mat-select-trigger>
 
-    <mat-option *ngFor="let acc of accounts" [value]="acc.id">
+    <mat-option *ngFor="let acc of visibleAccounts" [value]="acc.id">
       <div class="account-option-container">
         <span class="acc-id-label">Account #{{acc.id}}</span>
         <span class="acc-balance-subtext">{{acc.balance | currency:'INR'}}</span>
+        <span *ngIf="acc.status === 'LOCKED'" style="color: #f44336; font-size: 0.7rem; margin-left: 8px;">
+          (LOCKED)
+        </span>
       </div>
     </mat-option>
   </mat-select>

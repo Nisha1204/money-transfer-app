@@ -145,11 +145,11 @@
       (selectedIndexChange)="onTabChange($event)" 
       class="custom-tabs"
       animationDuration="0ms">
-      <mat-tab *ngFor="let acc of accounts">
+      
+      <mat-tab *ngFor="let acc of visibleAccounts">
         <ng-template mat-tab-label>
           <div class="tab-label">
-            <span class="acc-id">#{{ acc.id }}</span>
-            <span class="acc-type">Primary Account</span>
+            <span class="acc-id">Account Number: #{{ acc.id }}</span>
           </div>
         </ng-template>
       </mat-tab>
@@ -184,7 +184,7 @@
           </div>
           <div class="action-item" (click)="viewAccountDetails(selectedAccount.id)">
             <div class="icon-box details"><mat-icon>manage_accounts</mat-icon></div>
-            <span>Settings</span>
+            <span>Account Details</span>
           </div>
         </div>
       </div>

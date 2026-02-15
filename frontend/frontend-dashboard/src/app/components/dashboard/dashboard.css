@@ -315,6 +315,7 @@
 
 .dot { width: 8px; height: 8px; border-radius: 50%; background: #4ade80; }
 .dot.locked { background: #f87171; }
+.dot.closed { background:black;}
 
 /* Action Grid */
 .action-grid {

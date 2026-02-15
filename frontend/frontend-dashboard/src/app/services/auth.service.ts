@@ -49,7 +49,7 @@ logout(): void {
     return this.http.post<any>(registerUrl, { 
       username, 
       password,
-      role: 'USER' // Optional: depending on your DTO
+      role: 'ADMIN' // Optional: depending on your DTO
     });
   }
 
@@ -87,6 +87,13 @@ getCurrentUser(): number | null {
     console.error('Error parsing user data', e);
     return null;
   }
+}
+
+getUserRole(): string | null {
+  const userData = localStorage.getItem('user_data');
+  if (!userData) return null;
+  const user = JSON.parse(userData);
+  return user.role; // Will return 'ADMIN' or 'USER'
 }
 
 }

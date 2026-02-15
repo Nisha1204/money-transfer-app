@@ -1,13 +1,16 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.UserRegistrationDto;
+import com.example.demo.entity.User;
 import com.example.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth") // Matches your Frontend URL
@@ -28,16 +31,28 @@ public class AuthController {
         }
     }
 
-    // ✅ LOGIN ENDPOINT
+    // LOGIN ENDPOINT
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> login(@RequestBody UserRegistrationDto loginDto) {
-        // Check if user exists and password matches
-        boolean isValid = userService.validateUser(loginDto.getUsername(), loginDto.getPassword());
+    public ResponseEntity<?> login(@RequestBody UserRegistrationDto loginDto) {
+        // 1. Fetch the user to check roles and verify password
+        Optional<User> userOptional = userService.getUserByUsername(loginDto.getUsername());
 
-        if (isValid) {
-            return ResponseEntity.ok(Collections.singletonMap("message", "Login successful"));
-        } else {
-            return ResponseEntity.status(401).body(Collections.singletonMap("message", "Invalid username or password"));
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+
+            // 2. Validate password
+            if (userService.validateUser(loginDto.getUsername(), loginDto.getPassword())) {
+                // 3. Return user details including role for frontend routing
+                Map<String, Object> response = new HashMap<>();
+                response.put("id", user.getId());
+                response.put("username", user.getUsername());
+                response.put("role", user.getRole());
+                response.put("message", "Login successful");
+
+                return ResponseEntity.ok(response);
+            }
         }
+
+        return ResponseEntity.status(401).body(Collections.singletonMap("message", "Invalid username or password"));
     }
 }

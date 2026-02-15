@@ -45,16 +45,19 @@ export class DashboardComponent implements OnInit {
     this.loadUserData();
   }
 
+  // Filtered list for the UI tabs 
+  get visibleAccounts(): AccountResponse[] {
+    return this.accounts.filter(acc => acc.status !== 'CLOSED');
+  }
+
   loadUserData(): void {
     this.loading = true;
-    this.error = '';
-    
     this.accountService.getMyAccounts().subscribe({
       next: (data) => {
         this.accounts = data;
-        if (data && data.length > 0) {
-          // Default to the first account on load
-          this.selectedAccount = data[0];
+        // Default to the first VISIBLE account instead of just the first account
+        if (this.visibleAccounts.length > 0) {
+          this.selectedAccount = this.visibleAccounts[0];
         }
         this.loading = false;
         this.cdr.detectChanges();
@@ -70,7 +73,7 @@ export class DashboardComponent implements OnInit {
 
   // New method to handle tab selection
   onTabChange(index: number): void {
-    this.selectedAccount = this.accounts[index];
+    this.selectedAccount = this.visibleAccounts[index];
   }
   
   viewAccountDetails(id: number): void { 

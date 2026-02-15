@@ -142,8 +142,8 @@
         
         <div class="amount-display">
           <span class="currency">₹</span>
-          <span class="integer">{{ balance }}</span>
-          <span class="decimal">.{{ balance }}</span>
+          <span class="integer">{{ integerPart }}</span>
+          <span class="decimal">{{ decimalPart }}</span>
         </div>
 
         <div class="account-pill" *ngIf="accountData">

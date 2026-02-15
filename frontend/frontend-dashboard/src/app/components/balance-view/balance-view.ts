@@ -85,4 +85,13 @@ export class BalanceViewComponent implements OnInit {
   viewFullDetails(): void {
     this.router.navigate(['/account-details', this.accountId]);
   }
+
+  get integerPart() {
+    return Math.floor(this.balance);
+  }
+
+  get decimalPart() {
+    const decimal = (this.balance % 1).toFixed(2); 
+    return decimal.substring(1); 
+  }
 }

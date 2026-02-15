@@ -7,6 +7,7 @@ import { TransferComponent } from './components/transfer/transfer';
 import { Login } from './components/login/login';
 import { Register } from './components/register/register';
 import { TransactionHistory } from './components/transaction-history/transaction-history';
+import { AdminDashboard } from './components/admin-dashboard/admin-dashboard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -36,6 +37,11 @@ export const routes: Routes = [
     path: 'transactions/:id', 
     component: TransactionHistory,
     canActivate: [AuthGuard]
+  },
+  { 
+    path: 'admin-dashboard', 
+    component: AdminDashboard, 
+    canActivate: [AuthGuard] 
   },
   { path: '**', redirectTo: '/login' }
 ];

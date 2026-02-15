@@ -6,12 +6,12 @@ from sqlalchemy import create_engine
 import datetime
 
 # --- CONFIGURATION ---
-MYSQL_URI = "mysql+pymysql://root:Root123$@127.0.0.1/money_db"
+MYSQL_URI = "mysql+pymysql://root:<PASSWORD>@127.0.0.1/money_db"
 
 SNOWFLAKE_CONFIG = {
-    'user': 'Nisha',
-    'password': 'Snowflake@Nisha123',
-    'account': 'BEAFINV-FHC86386',
+    'user': 'User',
+    'password': 'Password',
+    'account': 'accound_identifier',
     'warehouse': 'COMPUTE_WH',
     'database': 'MONEY_DB',
     'schema': 'ANALYTICS',
